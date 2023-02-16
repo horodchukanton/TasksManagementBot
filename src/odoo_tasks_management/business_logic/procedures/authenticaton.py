@@ -3,9 +3,12 @@ from typing import Union
 import injector
 from telebot.types import Message
 
-from business_logic.base.operation import Operation, Prompt
-from messenger.telegram import Bot
-from odoo.client import OdooClient
+from odoo_tasks_management.business_logic.base.operation import (
+    Operation,
+    Prompt,
+)
+from odoo_tasks_management.messenger.telegram import Bot
+from odoo_tasks_management.odoo.client import OdooClient
 
 
 class AuthenticationFactory:
@@ -19,7 +22,6 @@ class AuthenticationFactory:
 
 
 class Authentication:
-
     def __init__(self, odoo_client: OdooClient, bot: Bot):
         self._odoo_client = odoo_client
         self._bot = bot
@@ -28,16 +30,16 @@ class Authentication:
             prompts=[
                 Prompt(
                     text="Please enter your Odoo login",
-                    expects=['text'],
-                    handler=self.check_login
+                    expects=["text"],
+                    handler=self.check_login,
                 ),
                 Prompt(
                     text="Please check your Odoo inbox for the OTP code and paste it here",
-                    expects=['text'],
-                    handler=self.check_otp
-                )
+                    expects=["text"],
+                    handler=self.check_otp,
+                ),
             ],
-            on_finish=self.save_chat_id_for_current_user
+            on_finish=self.save_chat_id_for_current_user,
         )
 
         self._context = {}
@@ -47,14 +49,19 @@ class Authentication:
         return self._operation
 
     def check_login(self, chat_id: Union[int, str], message: Message):
-        self._context['login'] = message.text
-        self._context['otp'] = '123456'  # TODO: generate random number
+        self._context["login"] = message.text
+        # TODO: check that user with this login exists
 
+        self._context["otp"] = "123456"  # TODO: generate random number
+        self._odoo_client.send_inbox_message(
+            self._context["login"],
+            self._context["otp"]
+        )
         # TODO: Send OTP code as an inbox mail for the proposed login
         return True
 
     def check_otp(self, chat_id: Union[int, str], message: Message):
-        if message.text != self._context['otp']:
+        if message.text != self._context["otp"]:
             self._bot.send_message(chat_id, "Wrong OTP code provided")
             self._operation.abort(chat_id)
             return False

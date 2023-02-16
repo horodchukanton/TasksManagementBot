@@ -4,14 +4,15 @@ from typing import Union
 import injector
 from telebot.types import Message
 
-from business_logic.authenticaton import AuthenticationFactory
-from business_logic.base.exc import OperationAborted
-from business_logic.base.operation import Operation
-from messenger.telegram import Bot
+from odoo_tasks_management.business_logic.procedures.authenticaton import (
+    AuthenticationFactory,
+)
+from odoo_tasks_management.business_logic.base.exc import OperationAborted
+from odoo_tasks_management.business_logic.base.operation import Operation
+from odoo_tasks_management.messenger.telegram import Bot
 
 
 class Router:
-
     # Contains information about a session for user
     _running_operations = {}
 
@@ -35,20 +36,21 @@ class Router:
             return
 
         # Generic routes
-        if message.text == '/start':  # TODO: also check if user is registered
-            auth_logic = self._authentication_factory.initialize_authentication()
+        if message.text == "/start":  # TODO: also check if user is registered
+            auth_logic = (
+                self._authentication_factory.initialize_authentication()
+            )
             self._running_operations[chat_id] = auth_logic.run(chat_id)
         else:
             # TODO: send the root menu keyboard
             bot.send_message(chat_id, "Message is not recognized")
 
     def _handle_existing_operation(
-        self,
-        bot: Bot,
-        chat_id: Union[int, str],
-        message: Message
+        self, bot: Bot, chat_id: Union[int, str], message: Message
     ) -> bool:
-        running_operation: Operation = self._running_operations.get(chat_id, None)
+        running_operation: Operation = self._running_operations.get(
+            chat_id, None
+        )
         if not running_operation:
             return False
 

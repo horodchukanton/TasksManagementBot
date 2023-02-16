@@ -4,11 +4,10 @@ from typing import Callable
 import injector
 import telebot
 
-from settings import Settings
+from odoo_tasks_management.settings import Settings
 
 
 class Bot:
-
     @injector.inject
     def __init__(self, settings: Settings):
         self._bot = telebot.TeleBot(token=settings.BOT_TOKEN)

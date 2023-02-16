@@ -1,7 +1,10 @@
 from typing import Callable, List, Union
 
-from business_logic.base.exc import OperationAborted, PromptNotExpectedMessage
-from messenger.telegram import Bot
+from odoo_tasks_management.business_logic.base.exc import (
+    OperationAborted,
+    PromptNotExpectedMessage,
+)
+from odoo_tasks_management.messenger.telegram import Bot
 
 
 class Prompt:
@@ -15,7 +18,7 @@ class Prompt:
         self._expects = expects
         self._handler = handler
 
-    def run(self, operation: 'Operation', chat_id):
+    def run(self, operation: "Operation", chat_id):
         operation.bot.send_message(chat_id, self._text)
 
     def handle(self, chat_id, message):
@@ -33,12 +36,7 @@ class Operation:
     _current_prompt = None
     _current_prompt_num = 0
 
-    def __init__(
-        self,
-        bot: Bot,
-        prompts: List[Prompt],
-        on_finish: Callable
-    ):
+    def __init__(self, bot: Bot, prompts: List[Prompt], on_finish: Callable):
         self.bot = bot
         self._prompts = prompts
         self._on_finish = on_finish

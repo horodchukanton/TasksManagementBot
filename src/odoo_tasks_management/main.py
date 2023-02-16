@@ -1,15 +1,14 @@
 import injector
 
-from business_logic.module import BusinessLogicModule
-from messenger.interface import Interface
-from messenger.module import BotInterfaceModule
-from odoo.module import OdooClientModule
-from persistence.module import PersistenceModule
-from settings import Settings
+from odoo_tasks_management.business_logic.module import BusinessLogicModule
+from odoo_tasks_management.messenger.interface import Interface
+from odoo_tasks_management.messenger.module import BotInterfaceModule
+from odoo_tasks_management.odoo.module import OdooClientModule
+from odoo_tasks_management.persistence.module import PersistenceModule
+from odoo_tasks_management.settings import Settings
 
 
 class MainModule(injector.Module):
-
     def configure(self, binder: injector.Binder):
         binder.install(PersistenceModule)
         # binder.install(WebApiModule)
@@ -23,7 +22,11 @@ class MainModule(injector.Module):
         return Settings()
 
 
-if __name__ == '__main__':
+def main():
     container = injector.Injector(MainModule())
     app = container.get(Interface)
     app.run()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,11 +1,10 @@
 import injector
 
-from odoo.client import OdooClient
-from settings import Settings
+from odoo_tasks_management.odoo.client import OdooClient
+from odoo_tasks_management.settings import Settings
 
 
 class OdooClientModule(injector.Module):
-
     @injector.provider
     def _odoo_client(self, settings: Settings) -> OdooClient:
         return OdooClient(settings.ODOO_URL, settings.ODOO_API_KEY)
