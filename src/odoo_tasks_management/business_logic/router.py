@@ -4,7 +4,7 @@ from typing import Union
 import injector
 from telebot.types import Message
 
-from odoo_tasks_management.business_logic.procedures.authenticaton import (
+from odoo_tasks_management.business_logic.procedures.authentication import (
     AuthenticationFactory,
 )
 from odoo_tasks_management.business_logic.base.exc import OperationAborted

@@ -1,6 +1,6 @@
 import injector
 
-from odoo_tasks_management.business_logic.procedures.authenticaton import (
+from odoo_tasks_management.business_logic.procedures.authentication import (
     AuthenticationFactory,
 )
 from odoo_tasks_management.messenger.telegram import Bot
