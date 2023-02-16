@@ -1,19 +1,30 @@
 from typing import Union
 
+import injector
 from telebot.types import Message
 
 from business_logic.base.operation import Operation, Prompt
-from messenger.base import Interface
+from messenger.telegram import Bot
 from odoo.client import OdooClient
+
+
+class AuthenticationFactory:
+    @injector.inject
+    def __init__(self, odoo_client: OdooClient, bot: Bot):
+        self._odoo_client = odoo_client
+        self._bot = bot
+
+    def initialize_authentication(self):
+        return Authentication(self._odoo_client, self._bot)
 
 
 class Authentication:
 
-    def __init__(self, odoo_client: OdooClient, bot: Interface):
+    def __init__(self, odoo_client: OdooClient, bot: Bot):
         self._odoo_client = odoo_client
         self._bot = bot
         self._operation = Operation(
-            interface=bot,
+            bot=bot,
             prompts=[
                 Prompt(
                     text="Please enter your Odoo login",

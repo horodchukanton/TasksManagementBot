@@ -1,7 +1,7 @@
-from typing import Callable, List, Type, Union
+from typing import Callable, List, Union
 
 from business_logic.base.exc import OperationAborted, PromptNotExpectedMessage
-from messenger.base import Interface
+from messenger.telegram import Bot
 
 
 class Prompt:
@@ -16,7 +16,7 @@ class Prompt:
         self._handler = handler
 
     def run(self, operation: 'Operation', chat_id):
-        operation.interface.send_message(chat_id, self._text)
+        operation.bot.send_message(chat_id, self._text)
 
     def handle(self, chat_id, message):
         self._check_message_is_expected(message)
@@ -35,11 +35,11 @@ class Operation:
 
     def __init__(
         self,
-        interface: Interface,
+        bot: Bot,
         prompts: List[Prompt],
         on_finish: Callable
     ):
-        self.interface = interface
+        self.bot = bot
         self._prompts = prompts
         self._on_finish = on_finish
 
@@ -55,8 +55,8 @@ class Operation:
         self._current_prompt_num += 1
         return self._proceed(chat_id, self._current_prompt_num)
 
-    def abort(self, chat_id):
-        self.interface.send_message(chat_id, "Operation aborted")
+    def abort(self, chat_id, err_message: str = "Operation aborted"):
+        self.bot.send_message(chat_id, err_message)
         self.is_finished = True
         raise OperationAborted()
 

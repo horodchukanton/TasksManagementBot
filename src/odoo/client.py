@@ -3,8 +3,14 @@ import xmlrpc.client
 
 class OdooClient:
     def __init__(self, url, api_key):
+        return
+
         self.url = url
         self.api_key = api_key
+
+        if not self.url or not self.api_key:
+            raise EnvironmentError("Odoo URL and API key have to be specified in config.env")
+
         self.common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(self.url))
         self.uid = self.common.authenticate('', '', self.api_key, {})
         self.models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(self.url))

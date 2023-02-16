@@ -1,23 +1,29 @@
-from business_logic.router import Router
-from messenger.telegram import TelegramInterface
-from odoo.client import OdooClient
+import injector
+
+from business_logic.module import BusinessLogicModule
+from messenger.interface import Interface
+from messenger.module import BotInterfaceModule
+from odoo.module import OdooClientModule
+from persistence.module import PersistenceModule
 from settings import Settings
 
 
-class Main:
+class MainModule(injector.Module):
 
-    def __init__(self, settings: Settings):
-        self._settings: Settings = settings
+    def configure(self, binder: injector.Binder):
+        binder.install(PersistenceModule)
+        # binder.install(WebApiModule)
+        binder.install(OdooClientModule)
+        binder.install(BotInterfaceModule)
+        binder.install(BusinessLogicModule)
 
-        # self._odoo_client = OdooClient(settings.ODOO_URL, settings.ODOO_API_KEY)
-        self._odoo_client = None
-        self._router = Router(self._odoo_client)
-        self._interface = TelegramInterface(settings, self._router)
-
-    def run(self):
-        self._interface.run()
+    @injector.provider
+    @injector.singleton
+    def _settings(self) -> Settings:
+        return Settings()
 
 
 if __name__ == '__main__':
-    bot_settings = Settings()
-    Main(bot_settings).run()
+    container = injector.Injector(MainModule())
+    app = container.get(Interface)
+    app.run()
