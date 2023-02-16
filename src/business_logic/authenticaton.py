@@ -1,0 +1,58 @@
+from typing import Union
+
+from telebot.types import Message
+
+from business_logic.base.operation import Operation, Prompt
+from messenger.base import Interface
+from odoo.client import OdooClient
+
+
+class Authentication:
+
+    def __init__(self, odoo_client: OdooClient, bot: Interface):
+        self._odoo_client = odoo_client
+        self._bot = bot
+        self._operation = Operation(
+            interface=bot,
+            prompts=[
+                Prompt(
+                    text="Please enter your Odoo login",
+                    expects=['text'],
+                    handler=self.check_login
+                ),
+                Prompt(
+                    text="Please check your Odoo inbox for the OTP code and paste it here",
+                    expects=['text'],
+                    handler=self.check_otp
+                )
+            ],
+            on_finish=self.save_chat_id_for_current_user
+        )
+
+        self._context = {}
+
+    def run(self, chat_id: Union[str, int]):
+        self._operation.run(chat_id)
+        return self._operation
+
+    def check_login(self, chat_id: Union[int, str], message: Message):
+        self._context['login'] = message.text
+        self._context['otp'] = '123456'  # TODO: generate random number
+
+        # TODO: Send OTP code as an inbox mail for the proposed login
+        return True
+
+    def check_otp(self, chat_id: Union[int, str], message: Message):
+        if message.text != self._context['otp']:
+            self._bot.send_message(chat_id, "Wrong OTP code provided")
+            self._operation.abort(chat_id)
+            return False
+
+        return True
+
+    def save_chat_id_for_current_user(self, chat_id: Union[int, str]):
+        # TODO: Update the user with a corresponding login
+
+        self._bot.send_message(
+            chat_id, f"You are logged in now, {self._context['login']}!"
+        )
