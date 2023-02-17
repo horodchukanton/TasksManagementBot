@@ -54,8 +54,7 @@ class Authentication:
 
         self._context["otp"] = "123456"  # TODO: generate random number
         self._odoo_client.send_inbox_message(
-            self._context["login"],
-            self._context["otp"]
+            self._context["login"], self._context["otp"]
         )
         # TODO: Send OTP code as an inbox mail for the proposed login
         return True
