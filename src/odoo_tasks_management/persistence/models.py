@@ -1,19 +1,51 @@
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
-base = declarative_base()
-
-
-class Project(base):
-    pass
+Base = declarative_base()
 
 
-class User(base):
-    pass
+class Project(Base):
+    __tablename__ = "weba_telegram_bot_projects"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
 
 
-class Task(base):
-    pass
+class User(Base):
+    __tablename__ = "weba_telegram_bot_users"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    telegram_chat_id = Column(String)
+    access_level = Column(Integer)
 
 
-class Activity(base):
-    pass
+class Task(Base):
+    __tablename__ = "weba_telegram_bot_tasks"
+
+    id = Column(Integer, primary_key=True)
+    parent_task_id = Column(Integer, ForeignKey("weba_telegram_bot_tasks.id"))
+    assignee = Column(Integer, ForeignKey("weba_telegram_bot_users.id"))
+    responsible = Column(Integer, ForeignKey("weba_telegram_bot_users.id"))
+    title = Column(String)
+    description = Column(String)
+    deadline = Column(DateTime)
+    status = Column(String)
+    planned_hours = Column(Integer)
+
+    parent_task = relationship("Task", remote_side=[id])
+    assignee_user = relationship("User", foreign_keys=[assignee])
+    responsible_user = relationship("User", foreign_keys=[responsible])
+
+#
+# class Notification(Base):
+#     __tablename__ = 'weba_telegram_bot_notifications'
+#
+#     id = Column(Integer, primary_key=True)
+#     user_id = Column(Integer, ForeignKey('weba_telegram_bot_users.id'))
+#     task_id = Column(Integer, ForeignKey('weba_telegram_bot_tasks.id'))
+#     message = Column(String)
+#
+#     user = relationship('User')
+#     task = relationship('Task')
