@@ -1,0 +1,29 @@
+name: Tox tests
+
+on: [ push, pull_request ]
+
+jobs:
+  tox:
+    strategy:
+      matrix:
+        environment:
+          - black
+          - sdist_install
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox
+
+      - name: Run Tox tests for ${{ matrix.environment }}
+        run: tox -e ${{ matrix.environment }}
