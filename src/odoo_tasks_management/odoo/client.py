@@ -17,9 +17,7 @@ class OdooClient:
 
     @cached_property
     def common(self):
-        return xmlrpc.client.ServerProxy(
-            f"{self.url}/xmlrpc/2/common"
-        )
+        return xmlrpc.client.ServerProxy(f"{self.url}/xmlrpc/2/common")
 
     @cached_property
     def uid(self):
@@ -27,9 +25,7 @@ class OdooClient:
 
     @cached_property
     def models(self):
-        return xmlrpc.client.ServerProxy(
-            f"{self.url}/xmlrpc/2/object"
-        )
+        return xmlrpc.client.ServerProxy(f"{self.url}/xmlrpc/2/object")
 
     def get_users(self) -> List[User]:
         user_ids = self.models.execute_kw(
