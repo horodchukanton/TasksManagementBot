@@ -9,7 +9,6 @@ class DB:
             ...
         )  # sessionmaker(autocommit=False, autoflush=True,
         # bind=self.engine)
-        pass
 
     def session(self):
         return self.session_source()

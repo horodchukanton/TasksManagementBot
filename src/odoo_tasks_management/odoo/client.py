@@ -1,4 +1,5 @@
 import xmlrpc.client
+from functools import cached_property
 from typing import List
 
 from odoo_tasks_management.persistence.models import User
@@ -13,14 +14,22 @@ class OdooClient:
             raise EnvironmentError(
                 "Odoo URL and API key have to be specified in config.env"
             )
-        #
-        # self.common = xmlrpc.client.ServerProxy(
-        #     "{}/xmlrpc/2/common".format(self.url)
-        # )
-        # self.uid = self.common.authenticate("", "", self.api_key, {})
-        # self.models = xmlrpc.client.ServerProxy(
-        #     "{}/xmlrpc/2/object".format(self.url)
-        # )
+
+    @cached_property
+    def common(self):
+        return xmlrpc.client.ServerProxy(
+            f"{self.url}/xmlrpc/2/common"
+        )
+
+    @cached_property
+    def uid(self):
+        return self.common.authenticate("", "", self.api_key, {})
+
+    @cached_property
+    def models(self):
+        return xmlrpc.client.ServerProxy(
+            f"{self.url}/xmlrpc/2/object"
+        )
 
     def get_users(self) -> List[User]:
         user_ids = self.models.execute_kw(

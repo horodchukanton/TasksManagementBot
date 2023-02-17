@@ -7,9 +7,10 @@ jobs:
     strategy:
       matrix:
         environment:
-          - black
-          - sdist_install
           - py39-pytest
+          - pylint-src
+          - pylint-tests
+          - sdist_install
 
     runs-on: ubuntu-latest
 
