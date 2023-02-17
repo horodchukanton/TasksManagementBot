@@ -38,6 +38,7 @@ class Task(Base):
     assignee_user = relationship("User", foreign_keys=[assignee])
     responsible_user = relationship("User", foreign_keys=[responsible])
 
+
 #
 # class Notification(Base):
 #     __tablename__ = 'weba_telegram_bot_notifications'

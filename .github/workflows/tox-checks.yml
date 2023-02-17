@@ -9,6 +9,7 @@ jobs:
         environment:
           - black
           - sdist_install
+          - py39-pytest
 
     runs-on: ubuntu-latest
 
