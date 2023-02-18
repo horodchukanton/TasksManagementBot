@@ -1,0 +1,61 @@
+version: '3.4'
+services:
+
+  app:
+    command: tasks-management-bot
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+      target: app-prod
+    volumes:
+      - ../:usr/src/app/
+    environment:
+#      BOT_TOKEN: "whatever"
+      DB_DSN: "postgres://odoo:odoo@postgres:5433/weba_telegram_tasks_management"
+      ODOO_URL: "http://odoo:8069"
+      ODOO_API_KEY: "c7831f440f22ba296b72f2be3e058864d4d41fea"
+    links:
+      - odoo
+      - postgres-app
+
+  postgres-app:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_DB: weba_telegram_tasks_management
+    ports:
+      - "5433:5432"
+    volumes:
+      - "postgres-app-db:/var/lib/postgresql/data"
+
+  odoo:
+    image: odoo:14.0
+    platform: linux/amd64
+    environment:
+      HOST: postgres-odoo
+      USER: odoo
+      PASSWORD: strongpass
+    ports:
+      - "8069:8069"
+    links:
+      - postgres-odoo
+    volumes:
+      - "odoo-data:/var/lib/odoo"
+
+  postgres-odoo:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: strongpass
+      POSTGRES_DB: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - "postgres-odoo-db:/var/lib/postgresql/data"
+
+volumes:
+  "odoo-data":
+  "postgres-odoo-db":
+  "postgres-app-db":
