@@ -33,11 +33,12 @@ classifiers = [
 ]
 
 dependencies = [
-    "pyTelegramBotAPI~=4.10.0",
-    "sqlalchemy~=2.0.3",
-    "pydantic~=1.10.5",
-    "python-dotenv~=0.21.1",
-    "injector~=0.20.1",
+    "pyTelegramBotAPI",
+    "sqlalchemy",
+    "psycopg2",
+    "pydantic",
+    "python-dotenv",
+    "injector",
 ]
 
 [project.optional-dependencies]

@@ -13,7 +13,7 @@ from odoo_tasks_management.messenger.telegram import Bot
 
 
 class Router:
-    # Contains information about a session for user
+    # Contains information about current user position in the interface
     _running_operations = {}
 
     @injector.inject
