@@ -38,7 +38,7 @@ class Authentication:
                 ),
                 Prompt(
                     text="Please check your Odoo inbox"
-                         " for the OTP code and paste it here",
+                    " for the OTP code and paste it here",
                     expects=["text"],
                     handler=self.check_otp,
                 ),
