@@ -48,7 +48,7 @@ test = [
 ]
 
 [project.scripts]
-tasks-management-bot = "main:main"
+tasks-management-bot = "odoo_tasks_management.main:main"
 
 [tool.setuptools]
 

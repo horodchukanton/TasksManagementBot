@@ -8,6 +8,36 @@ This is an internal WEBA IT project to allow tasks management via Telegram Bot i
 * Copy the *config.env.sample* to *config.env*
 * Fill in the values in *config.env*
 
+
+### Using docker-compose environment
+
+Install [docker-compose](https://docs.docker.com/compose/install/)
+
+Enter the `docker` folder
+
+    ```$ cd docker```
+
+Bring up the docker-compose services:
+    ```$ docker-compose up -d odoo postgres-app```
+
+Odoo should be available on http://127.0.0.1:8069/
+
+Finish Odoo database creation and generate the API key.
+
+Create a Telegram bot using Bot Father (name doesn't matter).
+
+Use the following values in your config.env:
+```
+BOT_API_TOKEN = <your Telegram bot token>
+DB_DSN = 'postgres://odoo:odoo@127.0.0.1:5433/weba_tasks_management'
+
+ODOO_URL = 'http://127.0.0.1:8069'
+ODOO_DATABASE = 'odoo'
+ODOO_API_KEY = '<generated API key>'
+ODOO_API_LOGIN = '<insert admin email>'
+```
+
+
 ### Running tests locally:
 
 #### pytest

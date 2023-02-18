@@ -25,10 +25,7 @@ class OdooClient:
     @cached_property
     def uid(self):
         return self.common.authenticate(
-            self.database,
-            self.api_login,
-            self.api_key,
-            {}
+            self.database, self.api_login, self.api_key, {}
         )
 
     @cached_property
