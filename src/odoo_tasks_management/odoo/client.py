@@ -3,16 +3,19 @@ from functools import cached_property
 from typing import List
 
 from odoo_tasks_management.persistence.models import User
+from odoo_tasks_management.settings import Settings
 
 
 class OdooClient:
-    def __init__(self, url, api_key):
-        self.url = url
-        self.api_key = api_key
+    def __init__(self, settings: Settings):
+        self.url = settings.ODOO_URL
+        self.database = settings.ODOO_DATABASE
+        self.api_login = settings.ODOO_API_LOGIN
+        self.api_key = settings.ODOO_API_KEY
 
         if not self.url or not self.api_key:
             raise EnvironmentError(
-                "Odoo URL and API key have to be specified in config.env"
+                "ODOO_URL and ODOO_API_KEY have to be specified in config.env"
             )
 
     @cached_property
@@ -21,7 +24,12 @@ class OdooClient:
 
     @cached_property
     def uid(self):
-        return self.common.authenticate("", "", self.api_key, {})
+        return self.common.authenticate(
+            self.database,
+            self.api_login,
+            self.api_key,
+            {}
+        )
 
     @cached_property
     def models(self):
@@ -29,7 +37,7 @@ class OdooClient:
 
     def get_users(self) -> List[User]:
         user_ids = self.models.execute_kw(
-            self.url,
+            self.database,
             self.uid,
             self.api_key,
             "res.users",
@@ -37,7 +45,7 @@ class OdooClient:
             [[]],
         )
         users = self.models.execute_kw(
-            self.url,
+            self.database,
             self.uid,
             self.api_key,
             "res.users",
@@ -50,10 +58,8 @@ class OdooClient:
     def create_task(
         self,
     ):
-        task_id = self.models.execute_kw(
-            self.url, self.uid, self.api_key, "crm.task", "create", [{...}]
-        )
-        return task_id
+        # TODO
+        pass
 
     def send_inbox_message(self, login, message):
         # TODO

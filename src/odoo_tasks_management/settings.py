@@ -3,8 +3,11 @@ from pydantic import BaseSettings
 
 class Settings(BaseSettings):
     BOT_TOKEN = ""
+
     ODOO_URL = ""
+    ODOO_DATABASE = ""
     ODOO_API_KEY = ""
+    ODOO_API_LOGIN = ""
 
     DB_DSN: str
 

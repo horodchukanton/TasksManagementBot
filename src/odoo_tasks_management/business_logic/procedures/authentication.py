@@ -50,6 +50,8 @@ class Authentication:
 
     def check_login(self, chat_id: Union[int, str], message: Message):
         self._context["login"] = message.text
+
+        # users = self._odoo_client.get_users()
         # TODO: check that user with this login exists
 
         self._context["otp"] = "123456"  # TODO: generate random number
