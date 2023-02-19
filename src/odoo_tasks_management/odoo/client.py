@@ -82,12 +82,50 @@ class OdooClient:
         )
         return users
 
-    def create_task(
-        self,
-    ):
-        # TODO
-        pass
+def create_task(self, name):
+        proj_id = self.models.execute(            
+            self.database, 
+            self.uid, 
+            self.api_key,
+            'project.project',
+            'search',
+            [['name', '=', 'name']] )
 
-    def send_inbox_message(self, login, message):
-        # TODO
-        pass
+
+
+        new_task = self.models.execute_kw(
+            self.database, 
+            self.uid, 
+            self.api_key,
+            'project.task',
+            'create',
+            [{'name': 'test_name',
+              'project_id': proj_id,
+              }] )
+            
+        
+        return new_task #  id нового завдання
+
+
+def send_inbox_message(self, login, message):
+        user_id = self.models.execute(            
+            self.database, 
+            self.uid, 
+            self.api_key,
+            'hr.employee',
+            'search',
+            [['name', '=', 'login']] #  [['work_email' ,'=', 'login']] чи логин це пошта ?
+            )
+        
+        send_mess = self.models.execute(            
+            self.database, 
+            self.uid, 
+            self.api_key,
+            'mail.activity',
+            'create',
+            [user_id]
+            [[{}]]
+            )
+        return send_mess
+        
+
