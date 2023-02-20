@@ -9,22 +9,25 @@ from odoo_tasks_management.business_logic.base.operation import (
 )
 from odoo_tasks_management.messenger.telegram import Bot
 from odoo_tasks_management.odoo.client import OdooClient
+from odoo_tasks_management.persistence.db import DB
 
 
 class AuthenticationFactory:
     @injector.inject
-    def __init__(self, odoo_client: OdooClient, bot: Bot):
-        self._odoo_client = odoo_client
+    def __init__(self, db: DB, bot: Bot, odoo_client: OdooClient):
+        self._db = db
         self._bot = bot
+        self._odoo_client = odoo_client
 
     def initialize_authentication(self):
-        return Authentication(self._odoo_client, self._bot)
+        return Authentication(self._db, self._bot, self._odoo_client)
 
 
 class Authentication:
-    def __init__(self, odoo_client: OdooClient, bot: Bot):
-        self._odoo_client = odoo_client
+    def __init__(self, db: DB, bot: Bot, odoo_client: OdooClient):
+        self._db = db
         self._bot = bot
+        self._odoo_client = odoo_client
         self._operation = Operation(
             bot=bot,
             prompts=[
@@ -34,10 +37,8 @@ class Authentication:
                     handler=self.check_login,
                 ),
                 Prompt(
-                    text=(
-                        "Please check your Odoo inbox"
-                        " for the OTP code and paste it here"
-                    ),
+                    text="Please check your Odoo inbox"
+                    " for the OTP code and paste it here",
                     expects=["text"],
                     handler=self.check_otp,
                 ),
@@ -48,11 +49,15 @@ class Authentication:
         self._context = {}
 
     def run(self, chat_id: Union[str, int]):
+        # TODO: check if user is already authenticated
+
         self._operation.run(chat_id)
         return self._operation
 
     def check_login(self, chat_id: Union[int, str], message: Message):
         self._context["login"] = message.text
+
+        # users = self._odoo_client.get_users()
         # TODO: check that user with this login exists
 
         self._context["otp"] = "123456"  # TODO: generate random number

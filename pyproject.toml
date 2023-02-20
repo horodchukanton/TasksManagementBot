@@ -32,6 +32,7 @@ classifiers = [
 dependencies = [
     "pyTelegramBotAPI",
     "sqlalchemy",
+    "psycopg2",
     "pydantic",
     "python-dotenv",
     "injector",

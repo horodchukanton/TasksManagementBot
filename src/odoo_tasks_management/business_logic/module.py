@@ -1,15 +1,16 @@
 import injector
 
-from odoo_tasks_management.business_logic.procedures.authentication import (
-    AuthenticationFactory,
-)
 from odoo_tasks_management.messenger.telegram import Bot
 from odoo_tasks_management.odoo.client import OdooClient
+from .procedures.authentication import (
+    AuthenticationFactory,
+)
+from ..persistence.db import DB
 
 
 class BusinessLogicModule(injector.Module):
     @injector.provider
     def _authentication_factory(
-        self, odoo_client: OdooClient, bot: Bot
+        self, db: DB, bot: Bot, odoo_client: OdooClient
     ) -> AuthenticationFactory:
-        return AuthenticationFactory(odoo_client, bot)
+        return AuthenticationFactory(db, bot, odoo_client)
