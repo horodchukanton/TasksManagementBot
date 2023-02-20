@@ -57,14 +57,11 @@ build-backend = "setuptools.build_meta"
 
 
 # Additional configuration for development tools
-[tool.pylint]
-max-line-length = 80
+[tool.pylint.messages_control]
 disable = [
     "C0103", # (invalid-name)
     "C0114", # (missing-module-docstring)
     "C0115", # (missing-class-docstring)
     "C0116", # (missing-function-docstring)
     "R0903", # (too-few-public-methods)
-    "R0913", # (too-many-arguments)
-    "W0105", # (pointless-string-statement)
 ]

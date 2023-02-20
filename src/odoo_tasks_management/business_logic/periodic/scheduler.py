@@ -16,7 +16,8 @@ class PeriodicTask:
 
 
 class RepeatTimer(Timer):
-    def run(self, run_on_start: bool = False):
+    def run(self):
+        # pylint: disable=too-many-function-args
         while not self.finished.wait(self.interval):
             self.function(*self.args, **self.kwargs)
 
