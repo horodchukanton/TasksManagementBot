@@ -7,16 +7,25 @@ services:
       context: ../
       dockerfile: docker/Dockerfile
       target: app-prod
-    volumes:
-      - ../:usr/src/app/
     environment:
 #      BOT_TOKEN: "whatever"
-      DB_DSN: "postgres://odoo:odoo@postgres:5433/weba_telegram_tasks_management"
+      DB_DSN: "postgres://odoo:odoo@postgres-app:5433/weba_telegram_tasks_management"
       ODOO_URL: "http://odoo:8069"
+      ODOO_DATABASE: "http://odoo:8069"
+      ODOO_API_LOGIN: "c7831f440f22ba296b72f2be3e058864d4d41fea"
       ODOO_API_KEY: "c7831f440f22ba296b72f2be3e058864d4d41fea"
     links:
       - odoo
       - postgres-app
+
+  tests:
+    command: tox
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+      target: app-dev
+    volumes:
+      - ../:/usr/src/app/
 
   postgres-app:
     image: postgres:13
