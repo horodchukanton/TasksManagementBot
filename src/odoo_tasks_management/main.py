@@ -2,16 +2,16 @@ import threading
 
 import injector
 
-from odoo_tasks_management.business_logic.module import BusinessLogicModule
-from odoo_tasks_management.business_logic.periodic.database_synchronization import (
+from .business_logic.module import BusinessLogicModule
+from .business_logic.periodic.database_synchronization import (
     SynchronizeDatabase,
 )
-from odoo_tasks_management.business_logic.periodic.scheduler import Scheduler
-from odoo_tasks_management.messenger.interface import Interface
-from odoo_tasks_management.messenger.module import BotInterfaceModule
-from odoo_tasks_management.odoo.module import OdooClientModule
-from odoo_tasks_management.persistence.module import PersistenceModule
-from odoo_tasks_management.settings import Settings
+from .business_logic.periodic.scheduler import Scheduler
+from .messenger.interface import Interface
+from .messenger.module import BotInterfaceModule
+from .odoo.module import OdooClientModule
+from .persistence.module import PersistenceModule
+from .settings import Settings
 
 
 class MainModule(injector.Module):

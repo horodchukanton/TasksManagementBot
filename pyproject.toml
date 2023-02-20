@@ -1,14 +1,13 @@
 [project]
-name = "odoo-tasks-management-bot"
+name = "weba-odoo-tasks-management-bot"
 version = "0.0.1"
 
 description = "Application to run a Telegram bot to manage tasks in Odoo CRM module"
+keywords = ["internal", "telegram", "odoo", "tasks management"]
 readme = "README.md"
+license = { "file" = "LICENSE.md" }
 
 requires-python = ">=3.9"
-
-license = { "text" = "PROPRIETARY SOFTWARE" }
-keywords = ["internal", "telegram", "odoo"]
 
 authors = [
     { name = "A. Random Developer1", email = "author1@example.com" },
@@ -21,14 +20,12 @@ maintainers = [
 ]
 
 classifiers = [
-
+    "Private :: Do Not Upload",
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Internal",
     "Topic :: Project Management :: Tasks management",
     "License :: Proprietary :: Internal Use Only",
     "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3 :: Only",
 ]
 
@@ -42,10 +39,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = [
-    "pytest",
-    "mockito",
-    "black"
+dev = [
+    "black",
+    "pylint",
+    "pycodestyle",
+    "flake8",
 ]
 
 [project.scripts]
@@ -54,24 +52,16 @@ tasks-management-bot = "odoo_tasks_management.main:main"
 [tool.setuptools]
 
 [build-system]
-# These are the assumed default build requirements from pip:
-# https://pip.pypa.io/en/stable/reference/pip/#pep-517-and-518-support
 requires = ["setuptools>=43.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.black]
-line-length = 80
-target-version = ['py39', 'py310']
-include = '''
-(
-    ^/tests/.*[.]py$
-  | ^/src/.*[.]py$
-  | ^/setup[.]py
-)
-'''
-exclude = '''
-(
-    __pycache__
-  | ^/env/.*
-)
-'''
+
+# Additional configuration for development tools
+[tool.pylint.messages_control]
+disable = [
+    "C0103", # (invalid-name)
+    "C0114", # (missing-module-docstring)
+    "C0115", # (missing-class-docstring)
+    "C0116", # (missing-function-docstring)
+    "R0903", # (too-few-public-methods)
+]

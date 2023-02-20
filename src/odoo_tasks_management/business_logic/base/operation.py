@@ -42,7 +42,7 @@ class Operation:
         self._on_finish = on_finish
 
     def run(self, chat_id: Union[int, str]):
-        self._proceed(chat_id, 0)
+        return self._proceed(chat_id, 0)
 
     def on_next_message(self, chat_id: Union[int, str], message):
         try:
@@ -67,4 +67,4 @@ class Operation:
             return self.finish(chat_id)
 
         self._current_prompt = self._prompts[proceed_step]
-        self._current_prompt.run(self, chat_id)
+        return self._current_prompt.run(self, chat_id)

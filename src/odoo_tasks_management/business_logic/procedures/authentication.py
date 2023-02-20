@@ -55,6 +55,7 @@ class Authentication:
         return self._operation
 
     def check_login(self, chat_id: Union[int, str], message: Message):
+        self._context["chat_id"] = chat_id
         self._context["login"] = message.text
 
         # users = self._odoo_client.get_users()

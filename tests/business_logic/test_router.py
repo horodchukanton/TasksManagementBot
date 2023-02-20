@@ -1,7 +1,6 @@
 from mockito import ANY, mock, verify, when
 from pytest import fixture, mark
 
-from odoo_tasks_management.business_logic.base.operation import Operation
 from odoo_tasks_management.business_logic.procedures.authentication import (
     Authentication,
     AuthenticationFactory,
