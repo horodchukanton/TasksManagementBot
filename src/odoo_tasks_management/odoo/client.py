@@ -82,12 +82,78 @@ class OdooClient:
         )
         return users
 
-    def create_task(
-        self,
-    ):
-        # TODO
-        pass
+    
+    def create_task(self,
+                    project_name,
+                    partner_name,
+                    task_name,
+                    description,
+                    deadline):
+            models = models(self)
+
+            # отримати id проекту по його назві
+            proj_id = models.execute(self,            
+                                    self.db, 
+                                    self.uid, 
+                                    self.api_key,
+                                    'project.project',
+                                    'search',
+                                    [['name', '=', project_name]] )
+            proj_id = proj_id[0] #  list to int
+
+            # отримати id клієнта по його імені
+            part_id = models.execute_kw(self.db,
+                                        self.uid,
+                                        self.api_key,
+                                        'res.partner',
+                                        'search',
+                                        [[['name', '=', partner_name]]],
+                                        {})
+            part_id = part_id[0] #  list to int
+
+            # необхідні поля для нової таски
+            fields = {
+                        'name': task_name,              # char, назва задачі
+                        'project_id': proj_id,          # int, зв'язок з 'project.project'
+                        'description': description,     # html
+                        'stage_id':0,                   # int4, Тут Є питання !. Зв'язок з 'project.task.type'. Індексація з 0. 
+                        'partner_id': part_id,          # int, Клієнт, зв'язок з 'res.partner'
+                    'date_deadline': deadline           # YYYY-MM-DD
+                    }
+
+            new_task = models.execute_kw(self.database,
+                                        self.uid,
+                                        self.api_key,
+                                        'project.task',
+                                        'create',
+                                        [fields])
+            return new_task # id new task
+
+
+
 
     def send_inbox_message(self, login, message):
         # TODO
         pass
+
+
+    def get_all_projects(self, is_active = True):
+        models = models(self)
+
+        all_projects_fields = {'fields':['name',
+                                        'partner_id',   #  Клієнт
+                                        'user_id',      #  Керівник
+                                        'create_date',
+                                        'description'
+                                        ]}
+
+        
+        all_projects = models.execute_kw(self.db,
+                                            self.uid,
+                                            self.api_key,
+                                            'project.project',
+                                            'search_read',
+                                            [[['active', '=', is_active]]],
+                                            all_projects_fields) 
+        return all_projects
+
