@@ -93,7 +93,7 @@ class OdooClient:
 
             # отримати id проекту по його назві
             proj_id = models.execute(self,            
-                                    self.db, 
+                                    self.database, 
                                     self.uid, 
                                     self.api_key,
                                     'project.project',
@@ -102,7 +102,7 @@ class OdooClient:
             proj_id = proj_id[0] #  list to int
 
             # отримати id клієнта по його імені
-            part_id = models.execute_kw(self.db,
+            part_id = models.execute_kw(self.database,
                                         self.uid,
                                         self.api_key,
                                         'res.partner',
@@ -148,7 +148,7 @@ class OdooClient:
                                         ]}
 
         
-        all_projects = models.execute_kw(self.db,
+        all_projects = models.execute_kw(self.database,
                                             self.uid,
                                             self.api_key,
                                             'project.project',
