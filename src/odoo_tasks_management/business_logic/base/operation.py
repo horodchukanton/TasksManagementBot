@@ -1,5 +1,7 @@
 from typing import Callable, List, Union
 
+from telebot import types
+
 from odoo_tasks_management.business_logic.base.exc import (
     OperationAborted,
     PromptNotExpectedMessage,
@@ -10,15 +12,32 @@ from odoo_tasks_management.messenger.telegram import Bot
 class Prompt:
     def __init__(
         self,
-        text: str,
         handler: Callable,
         expects: List[str],
+        text: str,
+        buttons: List[str] = None
     ):
-        self._text = text
         self._expects = expects
         self._handler = handler
+        self._text = text
+        self._buttons = buttons
 
     def run(self, operation: "Operation", chat_id):
+        if self._buttons:
+            items = []
+            markup = types.ReplyKeyboardMarkup()
+            for button in self._buttons:
+                item = types.KeyboardButton(f'{button}')
+                items.append(item)
+
+            markup.row(*items)
+
+            operation.bot.send_message(
+                chat_id,
+                self._text,
+                reply_markup=markup
+            )
+            return
         operation.bot.send_message(chat_id, self._text)
 
     def handle(self, chat_id, message):
