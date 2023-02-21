@@ -1,4 +1,4 @@
-from typing import Callable, List, Union
+from typing import Callable, List, Optional, Union
 
 from telebot import types
 
@@ -29,7 +29,6 @@ class Prompt:
             for button in self._buttons:
                 item = types.KeyboardButton(f'{button}')
                 items.append(item)
-
             markup.row(*items)
 
             operation.bot.send_message(
@@ -55,7 +54,12 @@ class Operation:
     _current_prompt = None
     _current_prompt_num = 0
 
-    def __init__(self, bot: Bot, prompts: List[Prompt], on_finish: Callable):
+    def __init__(
+        self,
+        bot: Bot,
+        prompts: List[Prompt],
+        on_finish: Optional[Callable] = None
+    ):
         self.bot = bot
         self._prompts = prompts
         self._on_finish = on_finish
@@ -79,7 +83,8 @@ class Operation:
 
     def finish(self, chat_id: Union[int, str]):
         self.is_finished = True
-        self._on_finish(chat_id)
+        if self._on_finish:
+            self._on_finish(chat_id)
 
     def _proceed(self, chat_id: Union[int, str], proceed_step: int):
         if self._current_prompt_num > len(self._prompts) - 1:
