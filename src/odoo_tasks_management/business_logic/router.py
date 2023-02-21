@@ -2,8 +2,10 @@ import logging
 from typing import Union
 
 import injector
+from telebot import types
 from telebot.types import Message
 
+from odoo_tasks_management.business_logic.menu import RootMenu
 from odoo_tasks_management.business_logic.procedures.authentication import (
     AuthenticationFactory,
 )
@@ -37,14 +39,21 @@ class Router:
             return
 
         # Generic routes
-        if message.text == "/start":  # TODO: also check if user is registered
+        if message.text == "/start":
+            # TODO: also check if user is registered
             # Initialize the authentication process and store it as a running operation
             auth_logic = self._authentication_factory.initialize_authentication()
             self._running_operations[chat_id] = auth_logic.run(chat_id)
         else:
             # TODO: send the root menu keyboard
+            menu_logic = RootMenu(
+                db=None,
+                bot=bot
+            )
+            self._running_operations[chat_id] = menu_logic.run(chat_id)
             # If the message is not recognized, send a message to the user
-            bot.send_message(chat_id, "Message is not recognized")
+            # elif message.text == "":
+            #     bot.send_message(chat_id, "Message is not recognized")
 
     def _handle_existing_operation(
         self, bot: Bot, chat_id: Union[int, str], message: Message
