@@ -5,14 +5,16 @@ from telebot.types import Message
 
 from odoo_tasks_management.business_logic.base.operation import Prompt, \
     Operation
+from odoo_tasks_management.business_logic.base.procedure import Procedure
 from odoo_tasks_management.messenger.telegram import Bot
 from odoo_tasks_management.persistence.db import DB
 
 
-class RootMenu:
-    def __init__(self, db: DB, bot: Bot):
+class RootMenu(Procedure):
+
+    def __init__(self, bot: Bot, db: DB):
+        super().__init__(bot)
         self._db = db
-        self._bot = bot
         self._operation = Operation(
             bot=bot,
             prompts=[
@@ -29,10 +31,6 @@ class RootMenu:
         )
 
         self._context = {}
-
-    def run(self, chat_id: Union[str, int]):
-        self._operation.run(chat_id)
-        return self._operation
 
     def choose_chapter(self, chat_id: Union[int, str], message: Message):
 
@@ -117,6 +115,3 @@ class RootMenu:
                     chat_id,
                     'Відмітити як виконано',
                     reply_markup=markup)
-
-
-

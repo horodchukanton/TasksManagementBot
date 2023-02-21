@@ -6,9 +6,7 @@ from telebot import types
 from telebot.types import Message
 
 from odoo_tasks_management.business_logic.menu import RootMenu
-from odoo_tasks_management.business_logic.procedures.authentication import (
-    AuthenticationFactory,
-)
+from odoo_tasks_management.business_logic.procedures.factory import OperationFactory
 from odoo_tasks_management.business_logic.base.exc import OperationAborted
 from odoo_tasks_management.business_logic.base.operation import Operation
 from odoo_tasks_management.messenger.telegram import Bot
@@ -21,9 +19,9 @@ class Router:
     @injector.inject
     def __init__(
         self,
-        authentication_factory: AuthenticationFactory,
+        operation_factory: OperationFactory,
     ):
-        self._authentication_factory = authentication_factory
+        self._operation_factory = operation_factory
 
     def handle_message(
         self,
@@ -42,8 +40,8 @@ class Router:
         if message.text == "/start":
             # TODO: also check if user is registered
             # Initialize the authentication process and store it as a running operation
-            auth_logic = self._authentication_factory.initialize_authentication()
-            self._running_operations[chat_id] = auth_logic.run(chat_id)
+            authentication = self._operation_factory.get_authentication()
+            self._start_operation(authentication)
         else:
             # TODO: send the root menu keyboard
             menu_logic = RootMenu(
@@ -73,10 +71,11 @@ class Router:
             running_operation.on_next_message(chat_id, message)
             return True
         except OperationAborted:
-            # If the operation is aborted, send a message to the user
-            bot.send_message(chat_id, "Operation aborted")
             return True
 
     def _finish_operation(self, chat_id):
         # Remove the running operation for the user
         del self._running_operations[chat_id]
+
+    def _start_operation(self, operation: Operation):
+        self._running_operations[chat_id] = authentication.run(chat_id)
