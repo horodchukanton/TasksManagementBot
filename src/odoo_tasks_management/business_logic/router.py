@@ -2,14 +2,15 @@ import logging
 from typing import Union
 
 import injector
-from telebot import types
 from telebot.types import Message
 
-from odoo_tasks_management.business_logic.menu import RootMenu
-from odoo_tasks_management.business_logic.procedures.factory import OperationFactory
 from odoo_tasks_management.business_logic.base.exc import OperationAborted
 from odoo_tasks_management.business_logic.base.operation import Operation
+from odoo_tasks_management.business_logic.base.procedure import Procedure
+from odoo_tasks_management.business_logic.menu.root_menu import RootMenu
+from odoo_tasks_management.business_logic.procedures.factory import ProcedureFactory
 from odoo_tasks_management.messenger.telegram import Bot
+from odoo_tasks_management.persistence.db import DB
 
 
 class Router:
@@ -19,9 +20,11 @@ class Router:
     @injector.inject
     def __init__(
         self,
-        operation_factory: OperationFactory,
+        db: DB,
+        procedure_factory: ProcedureFactory,
     ):
-        self._operation_factory = operation_factory
+        self._db = db
+        self._procedure_factory = procedure_factory
 
     def handle_message(
         self,
@@ -32,26 +35,16 @@ class Router:
         logging.debug("Received message:\n %s", str(message))
         chat_id = message.chat.id
 
+        if not self._check_user_authenticated(chat_id):
+            authentication = self._procedure_factory.get_authentication()
+            self._start_procedure(chat_id, authentication)
+
         # Handle a conversation
         if self._handle_existing_operation(bot, chat_id, message):
             return
 
-        # Generic routes
-        if message.text == "/start":
-            # TODO: also check if user is registered
-            # Initialize the authentication process and store it as a running operation
-            authentication = self._operation_factory.get_authentication()
-            self._start_operation(authentication)
-        else:
-            # TODO: send the root menu keyboard
-            menu_logic = RootMenu(
-                db=None,
-                bot=bot
-            )
-            self._running_operations[chat_id] = menu_logic.run(chat_id)
-            # If the message is not recognized, send a message to the user
-            # elif message.text == "":
-            #     bot.send_message(chat_id, "Message is not recognized")
+        menu_logic = RootMenu(self, bot, self._db)
+        self._start_procedure(chat_id, menu_logic)
 
     def _handle_existing_operation(
         self, bot: Bot, chat_id: Union[int, str], message: Message
@@ -77,5 +70,12 @@ class Router:
         # Remove the running operation for the user
         del self._running_operations[chat_id]
 
-    def _start_operation(self, operation: Operation):
-        self._running_operations[chat_id] = authentication.run(chat_id)
+    def _start_procedure(self, chat_id, procedure: Procedure):
+        self._running_operations[chat_id] = procedure.run(chat_id)
+
+    def proceed_with_procedure(self, chat_id, procedure: Procedure):
+        self._finish_operation(chat_id)
+        self._start_procedure(chat_id, procedure)
+
+    def _check_user_authenticated(self, chat_id):
+        return True

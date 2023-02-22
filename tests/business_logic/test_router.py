@@ -4,7 +4,7 @@ from pytest import fixture, mark
 from odoo_tasks_management.business_logic.procedures.authentication import (
     Authentication,
 )
-from odoo_tasks_management.business_logic.procedures.factory import OperationFactory
+from odoo_tasks_management.business_logic.procedures.factory import ProcedureFactory
 from odoo_tasks_management.business_logic.router import Router
 from odoo_tasks_management.messenger.telegram import Bot
 
@@ -18,7 +18,7 @@ class TestRouter:
 
     @fixture
     def authentication_factory(self, authentication):
-        factory = mock(OperationFactory)
+        factory = mock(ProcedureFactory)
         when(factory).get_authentication().thenReturn(authentication)
         return factory
 
