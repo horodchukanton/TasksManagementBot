@@ -31,15 +31,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release of version ${{ steps.get_version.outputs.version-without-v }}
-          draft: false
-          prerelease: ${{ contains(github.ref, 'dev') == true }}
+          release_name: Release of version 0.0.1
+          draft: true
+          prerelease: true
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/dist/weba_odoo_tasks_management_bot-${{ steps.get_version.outputs.version-without-v }}-py3-none-any.whl
+          asset_path: ${{ github.workspace }}/dist/weba_odoo_tasks_management_bot-0.0.1-py3-none-any.whl
           asset_name: weba_odoo_tasks_management_bot-0.0.1-py3-none-any.whl
           asset_content_type: application/zip
