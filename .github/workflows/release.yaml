@@ -19,7 +19,7 @@ jobs:
           pip install wheel
       - name: Build wheel
         run: |
-          pip wheel . -w dist/
+          pip wheel . -w ./dist/
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
