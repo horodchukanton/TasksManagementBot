@@ -26,25 +26,26 @@ jobs:
         id: read_version
         run: echo -n "version=$(poetry version --short)" >> $GITHUB_OUTPUT
       - name: Test
-        run: echo ${{ steps.read_version.outputs.outputs.version }}
-      - name: Build python package
-        run: |
-          poetry build
-      - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v{{ steps.read_version.outputs.outputs.version }}
-          release_name: Release of version {{ steps.read_version.outputs.outputs.version }}
-          draft: true
-          prerelease: true
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/dist/weba_odoo_tasks_management_bot-{{ steps.read_version.outputs.outputs.version }}-py3-none-any.whl
-          asset_name: weba_odoo_tasks_management_bot-{{ steps.read_version.outputs.outputs.version }}-py3-none-any.whl
-          asset_content_type: application/zip
+        run: echo ${{ steps.read_version.outputs.version }}
+#      - name: Build python package
+#        run: |
+#          poetry build
+#      - name: Create Release
+#        id: create_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: v{{ steps.read_version.outputs.outputs.version }}
+#          release_name: Release of version {{ steps.read_version.outputs.outputs.version }}
+#          draft: true
+#          prerelease: true
+#      - name: Upload Release Asset
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ${{ github.workspace }}/dist/weba_odoo_tasks_management_bot-{{ steps.read_version.outputs.outputs.version }}-py3-none-any.whl
+#          asset_name: weba_odoo_tasks_management_bot-{{ steps.read_version.outputs.outputs.version }}-py3-none-any.whl
+#          asset_content_type: application/zip
