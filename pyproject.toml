@@ -1,23 +1,15 @@
-[project]
+[tool.poetry]
 name = "weba-odoo-tasks-management-bot"
 version = "0.0.1"
-
 description = "Application to run a Telegram bot to manage tasks in Odoo CRM module"
-keywords = ["internal", "telegram", "odoo", "tasks management"]
-readme = "README.md"
-license = { "file" = "LICENSE.md" }
-
-requires-python = ">=3.9"
-
 authors = [
-    { name = "A. Random Developer1", email = "author1@example.com" },
-    { name = "A. Random Developer2", email = "author2@example.com" },
+    "Author1 <author1@example.com>",
+    "Author2 <author2@example.com>",
 ]
+readme = "README.md"
+license = "LICENSE.md"
 
-maintainers = [
-    { name = "A. Great Maintainer1", email = "maintainer1@example.com" },
-    { name = "A. Great Maintainer2", email = "maintainer2@example.com" },
-]
+packages = [{include = "src"}]
 
 classifiers = [
     "Private :: Do Not Upload",
@@ -29,31 +21,28 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
 ]
 
-dependencies = [
-    "pyTelegramBotAPI",
-    "sqlalchemy",
-    "psycopg2",
-    "pydantic",
-    "python-dotenv",
-    "injector",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pylint",
-    "pycodestyle",
-    "flake8",
-]
-
-[project.scripts]
+[tool.poetry.scripts]
 tasks-management-bot = "odoo_tasks_management.main:main"
 
-[tool.setuptools]
+[tool.poetry.dependencies]
+python = "^3.9"
+pyTelegramBotAPI = "*"
+sqlalchemy = "*"
+psycopg2 = "*"
+pydantic = "*"
+python-dotenv = "*"
+injector = "*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+mockito = "*"
+pylint = "*"
+pycodestyle = "*"
+flake8 = "*"
 
 [build-system]
-requires = ["setuptools>=43.0.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 # Additional configuration for development tools
 [tool.pylint.messages_control]
