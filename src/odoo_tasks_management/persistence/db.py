@@ -18,9 +18,7 @@ class DB:
         # It is used to get the database URL and other options needed to configure the engine and
         # session source.
 
-        engine = create_engine(
-            settings.DB_DSN, isolation_level="REPEATABLE READ"
-        )
+        engine = create_engine(settings.DB_DSN, isolation_level="REPEATABLE READ")
 
         Base.metadata.create_all(bind=engine)
 

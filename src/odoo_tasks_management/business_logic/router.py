@@ -50,9 +50,7 @@ class Router:
         self, bot: Bot, chat_id: Union[int, str], message: Message
     ) -> bool:
         # Check if there is an existing running operation for the user
-        running_operation: Operation = self._running_operations.get(
-            chat_id, None
-        )
+        running_operation: Operation = self._running_operations.get(chat_id, None)
         if not running_operation:
             return False
 

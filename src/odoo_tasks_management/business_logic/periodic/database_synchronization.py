@@ -2,7 +2,7 @@ import injector
 
 from odoo_tasks_management.odoo.client import OdooClient
 from odoo_tasks_management.persistence.db import DB
-from odoo_tasks_management.persistence.models import User
+from odoo_tasks_management.persistence.models import Project, Task, User
 
 
 class SynchronizeDatabase:
@@ -14,6 +14,8 @@ class SynchronizeDatabase:
     def run(self):
         print("TODO: Should get information from Odoo and save it to local DB")
         self.sync_users()
+        self.sync_projects()
+        self.sync_tasks()
 
     def sync_users(self):
         # Get users from Odoo
@@ -26,14 +28,64 @@ class SynchronizeDatabase:
         if not existing_users:
             session.add_all(
                 [
-                    User(
-                        id=u["id"],
-                        login=u["login"],
-                    )
+                    User(id=u["id"], login=u["login"])
                     for u in users
                 ]
             )
             session.commit()
+            return
+
+        # Compare the lists
+        # TODO:
+
+        # Apply the changes
+        # TODO:
+
+    def sync_projects(self):
+        projects = self._odoo_client.get_all_projects()
+        session = self._db.session()
+        existing_projects = session.query(Project).all()
+
+        if not existing_projects:
+            session.add_all(
+                [
+                    Project(id=p["id"], name=p["name"])
+                    for p in projects
+                ]
+            )
+            session.commit()
+            return
+
+        # Compare the lists
+        # TODO:
+
+        # Apply the changes
+        # TODO:
+
+    def sync_tasks(self):
+        tasks = self._odoo_client.get_all_tasks()
+        session = self._db.session()
+        existing_tasks = session.query(Task).all()
+
+        if not existing_tasks:
+            for t in tasks:
+                session.add(Task(
+                    id=t['id'],
+                    project_id=t['project_id'][0],
+                    parent_task_id=t['parent_id'] if t['parent_id'] else None,
+                    assignee=t['user_id'][0] if t['user_id'] else None,
+                    responsible=t['partner_id'][0] if t['partner_id'] else None,
+                    title=t['name'],
+                    description=t['description'],
+                    deadline=t['date_deadline'] if t['date_deadline'] else None,
+                    status=t['stage_id'][1],
+                    planned_hours=t['planned_hours'],
+                ))
+                try:
+                    session.flush()
+                    session.commit()
+                except:
+                    pass
             return
 
         # Compare the lists
