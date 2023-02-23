@@ -1,16 +1,21 @@
+from typing import Union
+
 from telebot.types import Message
 
 from odoo_tasks_management.business_logic.base.operation import Operation, Prompt
 from odoo_tasks_management.business_logic.base.procedure import Procedure
+from odoo_tasks_management.business_logic.menu.tasks_project_menu import \
+    TasksForProjectMenu
 from odoo_tasks_management.messenger.telegram import Bot
 from odoo_tasks_management.persistence.db import DB
 
 
 class ProjectsMenu(Procedure):
 
-    def __init__(self, db: DB, bot: Bot):
+    def __init__(self, router: 'Router', db: DB, bot: Bot):
         super().__init__(bot)
         self._db = db
+        self._router = router
         self._operation = Operation(
             bot=bot,
             prompts=[
@@ -18,16 +23,10 @@ class ProjectsMenu(Procedure):
                     buttons=self._get_projects(),
                     expects=["text"],
                     handler=self.project_chosen,
-                    text='Оберіть який проект бажаєте перевірити'
-                ),
-                Prompt(
-                    expects=["text"],
-                    handler=self.project_chosen,
-                    text='Що ви хочете зробити з проектом?',
-                    buttons=["Переглянути задачі по проекту"]
+                    text='За яким проектом бажаєте переглянути задачі'
                 ),
             ],
-            on_finish=lambda x: True,
+            on_finish=self.start_tasks_for_project_menu,
         )
 
         self._context = {}
@@ -39,5 +38,14 @@ class ProjectsMenu(Procedure):
 
     def project_chosen(self, chat_id, message: Message):
         project_name = message.text
-
         self._bot.send_message(chat_id, f"Chosen project is: {project_name}")
+        self._context['project'] = project_name
+
+    def start_tasks_for_project_menu(self, chat_id: Union[int, str]):
+        tasks_for_project_procedure = TasksForProjectMenu(
+            self._db, self._router, self._bot, self._context['project']
+        )
+        self._router.proceed_with_procedure(
+            chat_id,
+            tasks_for_project_procedure
+        )
