@@ -39,9 +39,7 @@ class Router:
         # Generic routes
         if message.text == "/start":  # TODO: also check if user is registered
             # Initialize the authentication process and store it as a running operation
-            auth_logic = (
-                self._authentication_factory.initialize_authentication()
-            )
+            auth_logic = self._authentication_factory.initialize_authentication()
             self._running_operations[chat_id] = auth_logic.run(chat_id)
         else:
             # TODO: send the root menu keyboard
@@ -52,9 +50,7 @@ class Router:
         self, bot: Bot, chat_id: Union[int, str], message: Message
     ) -> bool:
         # Check if there is an existing running operation for the user
-        running_operation: Operation = self._running_operations.get(
-            chat_id, None
-        )
+        running_operation: Operation = self._running_operations.get(chat_id, None)
         if not running_operation:
             return False
 

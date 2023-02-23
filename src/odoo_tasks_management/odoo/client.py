@@ -54,9 +54,7 @@ class OdooClient:
 
     @cached_property
     def uid(self):
-        return self.common.authenticate(
-            self.database, self.api_login, self.api_key, {}
-        )
+        return self.common.authenticate(self.database, self.api_login, self.api_key, {})
 
     @cached_property
     def models(self):
@@ -82,72 +80,67 @@ class OdooClient:
         )
         return users
 
+    def create_task(self, project_name, partner_name, task_name, description, deadline):
+        # отримати id проекту по його назві
+        proj_id = self.models.execute(
+            self,
+            self.database,
+            self.uid,
+            self.api_key,
+            "project.project",
+            "search",
+            [["name", "=", project_name]],
+        )
+        proj_id = proj_id[0]  #  list to int
 
-    def create_task(self,
-                    project_name,
-                    partner_name,
-                    task_name,
-                    description,
-                    deadline):
-            
-            # отримати id проекту по його назві
-            proj_id = self.models.execute(self,            
-                                    self.database, 
-                                    self.uid, 
-                                    self.api_key,
-                                    'project.project',
-                                    'search',
-                                    [['name', '=', project_name]] )
-            proj_id = proj_id[0] #  list to int
+        # отримати id клієнта по його імені
+        part_id = self.models.execute_kw(
+            self.database,
+            self.uid,
+            self.api_key,
+            "res.partner",
+            "search",
+            [[["name", "=", partner_name]]],
+            {},
+        )
+        part_id = part_id[0]  #  list to int
 
-            # отримати id клієнта по його імені
-            part_id = self.models.execute_kw(self.database,
-                                        self.uid,
-                                        self.api_key,
-                                        'res.partner',
-                                        'search',
-                                        [[['name', '=', partner_name]]],
-                                        {})
-            part_id = part_id[0] #  list to int
+        # необхідні поля для нової таски
+        fields = {
+            "name": task_name,  # char, назва задачі
+            "project_id": proj_id,  # int, зв'язок з 'project.project'
+            "description": description,  # html
+            "stage_id": 0,  # int4, Тут Є питання !. Зв'язок з 'project.task.type'. Індексація з 0.
+            "partner_id": part_id,  # int, Клієнт, зв'язок з 'res.partner'
+            "date_deadline": deadline,  # YYYY-MM-DD
+        }
 
-            # необхідні поля для нової таски
-            fields = {
-                        'name': task_name,              # char, назва задачі
-                        'project_id': proj_id,          # int, зв'язок з 'project.project'
-                        'description': description,     # html
-                        'stage_id': 0,                   # int4, Тут Є питання !. Зв'язок з 'project.task.type'. Індексація з 0. 
-                        'partner_id': part_id,          # int, Клієнт, зв'язок з 'res.partner'
-                    'date_deadline': deadline           # YYYY-MM-DD
-                    }
+        new_task = self.models.execute_kw(
+            self.database, self.uid, self.api_key, "project.task", "create", [fields]
+        )
+        return new_task  # id new task
 
-            new_task = self.models.execute_kw(self.database,
-                                                self.uid,
-                                                self.api_key,
-                                                'project.task',
-                                                'create',
-                                                [fields])
-            return new_task # id new task
+    def get_all_projects(self, is_active=True):
+        all_projects_fields = {
+            "fields": [
+                "name",
+                "partner_id",  #  Клієнт
+                "user_id",  #  Керівник
+                "create_date",
+                "description",
+            ]
+        }
 
-
-    def get_all_projects(self, is_active = True):
-
-        all_projects_fields = {'fields':['name',
-                                        'partner_id',   #  Клієнт
-                                        'user_id',      #  Керівник
-                                        'create_date',
-                                        'description'
-                                        ]}
-
-        
-        all_projects = self.models.execute_kw(self.database,
-                                            self.uid,
-                                            self.api_key,
-                                            'project.project',
-                                            'search_read',
-                                            [[['active', '=', is_active]]],
-                                            all_projects_fields) 
+        all_projects = self.models.execute_kw(
+            self.database,
+            self.uid,
+            self.api_key,
+            "project.project",
+            "search_read",
+            [[["active", "=", is_active]]],
+            all_projects_fields,
+        )
         return all_projects
-    
 
     def send_inbox_message(self, login, message):
         # TODO
