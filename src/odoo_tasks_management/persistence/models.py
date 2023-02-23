@@ -24,6 +24,7 @@ class Task(Base):
     __tablename__ = "weba_telegram_bot_tasks"
 
     id = Column(Integer, primary_key=True)
+    project_id = Column(Integer, ForeignKey("weba_telegram_bot_projects.id"))
     parent_task_id = Column(Integer, ForeignKey("weba_telegram_bot_tasks.id"))
     assignee = Column(Integer, ForeignKey("weba_telegram_bot_users.id"))
     responsible = Column(Integer, ForeignKey("weba_telegram_bot_users.id"))
@@ -33,6 +34,7 @@ class Task(Base):
     status = Column(String)
     planned_hours = Column(Integer)
 
+    # parent_project = relationship("Project", foreign_keys=[id])
     parent_task = relationship("Task", remote_side=[id])
     assignee_user = relationship("User", foreign_keys=[assignee])
     responsible_user = relationship("User", foreign_keys=[responsible])

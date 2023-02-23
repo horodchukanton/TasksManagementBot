@@ -142,6 +142,34 @@ class OdooClient:
         )
         return all_projects
 
+    def get_all_tasks(self):
+        all_projects_fields = {
+            "fields": [
+                "id",
+                "project_id",
+                "parent_id",
+                "user_id",
+                "partner_id",
+                "name",
+                "description",
+                "date_deadline",
+                "stage_id",
+                "planned_hours",
+            ]
+        }
+
+        all_tasks = self.models.execute_kw(
+            self.database,
+            self.uid,
+            self.api_key,
+            "project.task",
+            "search_read",
+            [[]],
+            all_projects_fields,
+        )
+
+        return all_tasks
+
     def send_inbox_message(self, login, message):
         # TODO
         pass
