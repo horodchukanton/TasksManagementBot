@@ -9,7 +9,7 @@ authors = [
 readme = "README.md"
 license = "LICENSE.md"
 
-packages = [{include = "src"}]
+packages = [{include = "src/odoo_tasks_management"}]
 
 classifiers = [
     "Private :: Do Not Upload",
