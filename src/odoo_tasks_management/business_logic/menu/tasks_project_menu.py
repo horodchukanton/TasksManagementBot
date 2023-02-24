@@ -29,6 +29,7 @@ class TasksForProjectMenu(Procedure):
                     text='Що ви хочете зробити із задачею?',
                     buttons=[
                         "Відмітити задачу, як виконану",
+                        "Повернутись до списку задач проекту",
                         "Головне меню", ]
                 ),
             ],
@@ -80,11 +81,10 @@ class TasksForProjectMenu(Procedure):
             self._bot.send_message(chat_id,
                                    f"Process with task is: {mark_task}")
 
-            # Антон: Переходимо у наступне меню
-            self._router.goto_mark_task_completed(chat_id, self._bot, self._context['task'])
-        elif message.text == "Ознайомитись із описом":
-            task_description = message.text
-            # TODO: по ID витягнути з БД опис обов'язкові поля по задачі
-            #  передати списокм у змінну. Змінну вивести користувачу
-            self._bot.send_message(chat_id,
-                                   f"Process with task is: {task_description}")
+        elif message.text == "Повернутись до списку задач проекту":
+            self._router.goto_tasks_for_project_menu(
+                chat_id, self._bot, self.project_name
+            )
+
+        elif message.text == "Головне меню":
+            self._router.goto_root_menu(chat_id, self._bot)
