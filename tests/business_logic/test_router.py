@@ -4,9 +4,10 @@ from pytest import fixture, mark
 from odoo_tasks_management.business_logic.procedures.authentication import (
     Authentication,
 )
-from odoo_tasks_management.business_logic.procedures.factory import ProcedureFactory
 from odoo_tasks_management.business_logic.router import Router
 from odoo_tasks_management.messenger.telegram import Bot
+from odoo_tasks_management.odoo.client import OdooClient
+from odoo_tasks_management.persistence.db import DB
 
 
 class TestRouter:
@@ -17,14 +18,16 @@ class TestRouter:
         return auth
 
     @fixture
-    def authentication_factory(self, authentication):
-        factory = mock(ProcedureFactory)
-        when(factory).get_authentication().thenReturn(authentication)
-        return factory
+    def odoo_client(self):
+        return mock(OdooClient)
 
     @fixture
-    def router(self, authentication_factory):
-        return Router(authentication_factory)
+    def db(self):
+        return mock(DB)
+
+    @fixture
+    def router(self, db, odoo_client):
+        return Router(db, odoo_client)
 
     @fixture
     def bot(self):

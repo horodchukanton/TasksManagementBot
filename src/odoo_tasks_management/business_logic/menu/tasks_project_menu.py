@@ -1,10 +1,7 @@
-from telebot.types import Message
 from typing import Union
 
 from odoo_tasks_management.business_logic.base.operation import Operation, Prompt
 from odoo_tasks_management.business_logic.base.procedure import Procedure
-from odoo_tasks_management.business_logic.menu.mark_task_completed import \
-    MarkTaskCompleted
 from odoo_tasks_management.messenger.telegram import Bot
 from odoo_tasks_management.persistence.db import DB
 
@@ -61,22 +58,11 @@ class TasksForProjectMenu(Procedure):
             mark_task = message.text
             self._bot.send_message(chat_id, f"Process with task is: {mark_task}")
 
-            mark_tasks_as_done = MarkTaskCompleted(
-                self._db, self._bot, self._context['task']
-            )
-            self._router.proceed_with_procedure(
-                chat_id,
-                mark_tasks_as_done
-            )
+            # Антон: Переходимо у наступне меню
+            self._router.goto_mark_task_completed(chat_id, self._bot, self._context['task'])
         elif message.text == "Ознайомитись із описом":
             task_description = message.text
             # TODO: по ID витягнути з БД опис обов'язкові поля по задачі
             #  передати списокм у змінну. Змінну вивести користувачу
             self._bot.send_message(chat_id,
                                    f"Process with task is: {task_description}")
-
-
-
-
-
-

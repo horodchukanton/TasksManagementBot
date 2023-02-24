@@ -4,8 +4,6 @@ from telebot.types import Message
 
 from odoo_tasks_management.business_logic.base.operation import Operation, Prompt
 from odoo_tasks_management.business_logic.base.procedure import Procedure
-from odoo_tasks_management.business_logic.menu.tasks_project_menu import \
-    TasksForProjectMenu
 from odoo_tasks_management.messenger.telegram import Bot
 from odoo_tasks_management.persistence.db import DB
 
@@ -42,10 +40,8 @@ class ProjectsMenu(Procedure):
         self._context['project'] = project_name
 
     def start_tasks_for_project_menu(self, chat_id: Union[int, str]):
-        tasks_for_project_procedure = TasksForProjectMenu(
-            self._db, self._router, self._bot, self._context['project']
-        )
-        self._router.proceed_with_procedure(
+        self._router.goto_tasks_for_project_menu(
             chat_id,
-            tasks_for_project_procedure
+            self._bot,
+            self._context['project']
         )
