@@ -1,12 +1,14 @@
 from telebot.types import Message
 from typing import Union
 
-from odoo_tasks_management.business_logic.base.operation import Operation, Prompt
+from odoo_tasks_management.business_logic.base.operation import Operation, \
+    Prompt
 from odoo_tasks_management.business_logic.base.procedure import Procedure
 from odoo_tasks_management.business_logic.menu.mark_task_completed import \
     MarkTaskCompleted
 from odoo_tasks_management.messenger.telegram import Bot
 from odoo_tasks_management.persistence.db import DB
+from odoo_tasks_management.persistence.models import Task, Project, User
 
 
 class TasksForProjectMenu(Procedure):
@@ -29,8 +31,8 @@ class TasksForProjectMenu(Procedure):
                     handler=self.chosen_process_with_tasks,
                     text='Що ви хочете зробити із задачею?',
                     buttons=[
-                        "Ознайомитись із описом",
-                        "Відмітити задачу, як виконану"]
+                        "Відмітити задачу, як виконану",
+                        "Головне меню", ]
                 ),
             ],
             on_finish=lambda x: True
@@ -39,27 +41,47 @@ class TasksForProjectMenu(Procedure):
         self._context = {}
 
     def _get_tasks(self, project_name):
-        if project_name == "project1":
-            return ["task1", "task2", "task3", "task4"]
-        elif project_name == "project2":
-            return ["task5", "task6", "task7", "task8"]
-        elif project_name == "project3":
-            return ["task9", "task10", "task11", "task12"]
-        elif project_name == "project4":
-            btns = []
-            for i in range(10):
-                btns.append("Одн велика і довга назва задачі")
-            return btns
+        current_project_id = self._db.session().query(Project.id).filter(
+            Project.name == project_name).one()[0]
+        project_tasks = self._db.session().query(Task.title).where(
+            Task.project_id == current_project_id).all()
+        current_project_tasks = []
+        for task in project_tasks:
+            current_project_tasks.append(task[0])
+        return current_project_tasks
 
     def task_chosen(self, chat_id, message):
         chosen_task = message.text
-        self._bot.send_message(chat_id, f"Chosen task is: {chosen_task}")
         self._context['task'] = chosen_task
+        task_title = chosen_task
+
+        task = self._db.session().query(Task).filter_by(
+            title=task_title
+        ).one()
+        task_assignee = task.assignee_user.login
+        task_responsible = task.responsible_user.login
+        task_deadline = task.deadline
+        task_status = task.status
+        task_description = task.description
+        task_planned_hours = task.planned_hours
+
+        self._bot.send_message(
+            chat_id,
+            f"<b>Заголовок задачі</b>: {chosen_task}\n"
+            f"<b>Виконавець задачі</b>:{task_assignee}\n"
+            f"<b>Відповідальний за задачу</b>:{task_responsible}\n"
+            f"<b>Кінцевий термін виконання задачі</b>:{task_deadline}\n"
+            f"<b>Статус задачі</b>: {task_status}\n"
+            f"<b>Опис задачі</b>: {task_description}\n"
+            f"<b>Кількість годин для виконання задачі</b>:{task_planned_hours}",
+            parse_mode='HTML'
+        )
 
     def chosen_process_with_tasks(self, chat_id: Union[int, str], message):
         if message.text == "Відмітити задачу, як виконану":
             mark_task = message.text
-            self._bot.send_message(chat_id, f"Process with task is: {mark_task}")
+            self._bot.send_message(chat_id,
+                                   f"Process with task is: {mark_task}")
 
             mark_tasks_as_done = MarkTaskCompleted(
                 self._db, self._bot, self._context['task']
@@ -74,9 +96,3 @@ class TasksForProjectMenu(Procedure):
             #  передати списокм у змінну. Змінну вивести користувачу
             self._bot.send_message(chat_id,
                                    f"Process with task is: {task_description}")
-
-
-
-
-
-

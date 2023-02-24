@@ -8,6 +8,7 @@ from odoo_tasks_management.business_logic.menu.tasks_project_menu import \
     TasksForProjectMenu
 from odoo_tasks_management.messenger.telegram import Bot
 from odoo_tasks_management.persistence.db import DB
+from odoo_tasks_management.persistence.models import Project
 
 
 class ProjectsMenu(Procedure):
@@ -32,9 +33,13 @@ class ProjectsMenu(Procedure):
         self._context = {}
 
     def _get_projects(self):
-        # TODO: get actual projects from DB
-        # projects = self._db.session().query(Project).all()
-        return ["project1", "project2", "project3", "project4"]
+        projects = self._db.session().query(Project).all()
+        project_names = []
+
+        for project in projects:
+            project_names.append(project.name)
+
+        return project_names
 
     def project_chosen(self, chat_id, message: Message):
         project_name = message.text
