@@ -1,38 +1,30 @@
 from typing import Union
 
-import injector
 from telebot.types import Message
 
 from odoo_tasks_management.business_logic.base.operation import (
     Operation,
     Prompt,
 )
+from odoo_tasks_management.business_logic.base.procedure import Procedure
 from odoo_tasks_management.messenger.telegram import Bot
 from odoo_tasks_management.odoo.client import OdooClient
 from odoo_tasks_management.persistence.db import DB
 
 
-class AuthenticationFactory:
-    @injector.inject
-    def __init__(self, db: DB, bot: Bot, odoo_client: OdooClient):
+class Authentication(Procedure):
+    def __init__(self, bot: Bot, db: DB, odoo_client: OdooClient):
+        super().__init__(bot)
         self._db = db
         self._bot = bot
         self._odoo_client = odoo_client
 
-    def initialize_authentication(self):
-        return Authentication(self._db, self._bot, self._odoo_client)
-
-
-class Authentication:
-    def __init__(self, db: DB, bot: Bot, odoo_client: OdooClient):
-        self._db = db
-        self._bot = bot
-        self._odoo_client = odoo_client
+        self._context = {}
         self._operation = Operation(
             bot=bot,
             prompts=[
                 Prompt(
-                    text="Please enter your Odoo login",
+                    text="Please enter an email you use for Odoo",
                     expects=["text"],
                     handler=self.check_login,
                 ),
@@ -46,14 +38,6 @@ class Authentication:
             on_finish=self.save_chat_id_for_current_user,
         )
 
-        self._context = {}
-
-    def run(self, chat_id: Union[str, int]):
-        # TODO: check if user is already authenticated
-
-        self._operation.run(chat_id)
-        return self._operation
-
     def check_login(self, chat_id: Union[int, str], message: Message):
         self._context["chat_id"] = chat_id
         self._context["login"] = message.text
@@ -61,11 +45,9 @@ class Authentication:
         # users = self._odoo_client.get_users()
         # TODO: check that user with this login exists
 
-        self._context["otp"] = "123456"  # TODO: generate random number
-        self._odoo_client.send_inbox_message(
-            self._context["login"], self._context["otp"]
-        )
-        # TODO: Send OTP code as an inbox mail for the proposed login
+        self._context["otp"] = self._generate_otp()
+        self._send_inbox_message_with_otp(self._context["login"], self._context["otp"])
+
         return True
 
     def check_otp(self, chat_id: Union[int, str], message: Message):
@@ -77,8 +59,19 @@ class Authentication:
         return True
 
     def save_chat_id_for_current_user(self, chat_id: Union[int, str]):
-        # TODO: Update the user with a corresponding login
+        # TODO: Save self._context["chat_id"] for user
+        #  with a corresponding self._context["login"]
 
         self._bot.send_message(
             chat_id, f"You are logged in now, {self._context['login']}!"
+        )
+
+    @staticmethod
+    def _generate_otp() -> str:
+        # TODO: generate random number
+        return "123456"
+
+    def _send_inbox_message_with_otp(self, odoo_login: str, otp: str):
+        self._odoo_client.send_inbox_message(
+            odoo_login, f"Here's you code to log into the Telegram Bot: {otp}"
         )

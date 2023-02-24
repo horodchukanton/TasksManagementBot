@@ -1,4 +1,6 @@
-from typing import Callable, List, Union
+from typing import Callable, List, Optional, Union
+
+from telebot import types
 
 from odoo_tasks_management.business_logic.base.exc import (
     OperationAborted,
@@ -10,15 +12,31 @@ from odoo_tasks_management.messenger.telegram import Bot
 class Prompt:
     def __init__(
         self,
-        text: str,
         handler: Callable,
         expects: List[str],
+        text: str,
+        buttons: List[str] = None
     ):
-        self._text = text
         self._expects = expects
         self._handler = handler
+        self._text = text
+        self._buttons = buttons
 
     def run(self, operation: "Operation", chat_id):
+        if self._buttons:
+            items = []
+            markup = types.ReplyKeyboardMarkup()
+            for button in self._buttons:
+                item = types.KeyboardButton(f'{button}')
+                items.append(item)
+            markup.row(*items)
+
+            operation.bot.send_message(
+                chat_id,
+                self._text,
+                reply_markup=markup
+            )
+            return
         operation.bot.send_message(chat_id, self._text)
 
     def handle(self, chat_id, message):
@@ -36,7 +54,12 @@ class Operation:
     _current_prompt = None
     _current_prompt_num = 0
 
-    def __init__(self, bot: Bot, prompts: List[Prompt], on_finish: Callable):
+    def __init__(
+        self,
+        bot: Bot,
+        prompts: List[Prompt],
+        on_finish: Optional[Callable] = None
+    ):
         self.bot = bot
         self._prompts = prompts
         self._on_finish = on_finish
@@ -60,7 +83,8 @@ class Operation:
 
     def finish(self, chat_id: Union[int, str]):
         self.is_finished = True
-        self._on_finish(chat_id)
+        if self._on_finish:
+            self._on_finish(chat_id)
 
     def _proceed(self, chat_id: Union[int, str], proceed_step: int):
         if self._current_prompt_num > len(self._prompts) - 1:
