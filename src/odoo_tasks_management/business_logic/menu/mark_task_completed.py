@@ -1,5 +1,3 @@
-from typing import Union
-
 from odoo_tasks_management.business_logic import router
 from odoo_tasks_management.business_logic.base.operation import Operation, Prompt
 from odoo_tasks_management.business_logic.base.procedure import Procedure
@@ -37,7 +35,3 @@ class MarkTaskCompleted(Procedure):
         # elif action == "Повернутись до списку задач проекту":
         #     self.start_tasks_for_project_menu
         #     )
-
-
-
-
