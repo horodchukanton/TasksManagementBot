@@ -7,7 +7,6 @@ from telebot.types import Message
 from odoo_tasks_management.business_logic.base.exc import OperationAborted
 from odoo_tasks_management.business_logic.base.operation import Operation
 from odoo_tasks_management.business_logic.base.procedure import Procedure
-from odoo_tasks_management.business_logic.menu.mark_task_completed import MarkTaskCompleted
 from odoo_tasks_management.business_logic.menu.projects_menu import ProjectsMenu
 from odoo_tasks_management.business_logic.menu.root_menu import RootMenu
 from odoo_tasks_management.business_logic.menu.tasks_project_menu import TasksForProjectMenu
@@ -106,10 +105,4 @@ class Router:
         self.proceed_with_procedure(
             chat_id,
             TasksForProjectMenu(db=self._db, router=self, bot=bot, project_name=project_name)
-        )
-
-    def goto_mark_task_completed(self, chat_id, bot: Bot, task_title: str):
-        self.proceed_with_procedure(
-            chat_id,
-            MarkTaskCompleted(db=self._db, bot=bot, task_title=task_title)
         )
