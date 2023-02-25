@@ -61,22 +61,14 @@ class OdooClient:
         return xmlrpc.client.ServerProxy(f"{self.url}/xmlrpc/2/object")
 
     def get_users(self) -> List[User]:
-        user_ids = self.models.execute_kw(
-            self.database,
-            self.uid,
-            self.api_key,
-            "res.users",
-            "search",
-            [[]],
-        )
         users = self.models.execute_kw(
             self.database,
             self.uid,
             self.api_key,
             "res.users",
-            "read",
-            [user_ids],
-            {"fields": ["id", "name", "login", "email"]},
+            "search_read",
+            [],
+            {"fields": ["id", "name", "login", "email"]}
         )
         return users
 
@@ -121,16 +113,6 @@ class OdooClient:
         return new_task  # id new task
 
     def get_all_projects(self, is_active=True):
-        all_projects_fields = {
-            "fields": [
-                "name",
-                "partner_id",  #  Клієнт
-                "user_id",  #  Керівник
-                "create_date",
-                "description",
-            ]
-        }
-
         all_projects = self.models.execute_kw(
             self.database,
             self.uid,
@@ -138,7 +120,15 @@ class OdooClient:
             "project.project",
             "search_read",
             [[["active", "=", is_active]]],
-            all_projects_fields,
+            {
+                "fields": [
+                    "name",
+                    "partner_id",  # Клієнт
+                    "user_id",  # Керівник
+                    "create_date",
+                    "description",
+                ]
+            },
         )
         return all_projects
 
@@ -149,12 +139,13 @@ class OdooClient:
                 "project_id",
                 "parent_id",
                 "user_id",
-                "partner_id",
+                # "partner_id",
                 "name",
                 "description",
                 "date_deadline",
                 "stage_id",
                 "planned_hours",
+                "create_uid"
             ]
         }
 
