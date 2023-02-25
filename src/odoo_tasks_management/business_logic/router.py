@@ -108,8 +108,8 @@ class Router:
             TasksForProjectMenu(db=self._db, router=self, bot=bot, project_name=project_name)
         )
 
-    def goto_mark_task_completed(self, chat_id, bot: Bot, chosen_task: str):
+    def goto_mark_task_completed(self, chat_id, bot: Bot, task_title: str):
         self.proceed_with_procedure(
             chat_id,
-            MarkTaskCompleted(db=self._db, bot=bot, chosen_task=chosen_task)
+            MarkTaskCompleted(db=self._db, bot=bot, task_title=task_title)
         )

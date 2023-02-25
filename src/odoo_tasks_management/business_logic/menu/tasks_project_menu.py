@@ -49,9 +49,7 @@ class TasksForProjectMenu(Procedure):
         return current_project_tasks
 
     def task_chosen(self, chat_id, message):
-        chosen_task = message.text
-        self._context['task'] = chosen_task
-        task_title = chosen_task
+        task_title = message.text
 
         task = self._db.session().query(Task).filter_by(
             title=task_title
@@ -65,7 +63,7 @@ class TasksForProjectMenu(Procedure):
 
         self._bot.send_message(
             chat_id,
-            f"<b>Заголовок задачі</b>: {chosen_task}\n"
+            f"<b>Заголовок задачі</b>: {task_title}\n"
             f"<b>Виконавець задачі</b>:{task_assignee}\n"
             f"<b>Відповідальний за задачу</b>:{task_responsible}\n"
             f"<b>Кінцевий термін виконання задачі</b>:{task_deadline}\n"
@@ -74,12 +72,21 @@ class TasksForProjectMenu(Procedure):
             f"<b>Кількість годин для виконання задачі</b>:{task_planned_hours}",
             parse_mode='HTML'
         )
+        self._context['task'] = task_title
 
     def chosen_process_with_tasks(self, chat_id: Union[int, str], message):
         if message.text == "Відмітити задачу, як виконану":
-            mark_task = message.text
+            task_title = self._context['task']
+            session = self._db.session()
+            task = session.query(Task).filter_by(title=task_title).one()
+            task.status = 'Done'
+            session.flush()
+            session.commit()
             self._bot.send_message(chat_id,
-                                   f"Process with task is: {mark_task}")
+                                   f"<b>{task_title}</b> status is <b>Done</b>",
+                                   parse_mode='HTML')
+
+            self._router.goto_root_menu(chat_id, self._bot)
 
         elif message.text == "Повернутись до списку задач проекту":
             self._router.goto_tasks_for_project_menu(
