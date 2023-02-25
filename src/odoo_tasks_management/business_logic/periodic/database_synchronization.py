@@ -1,4 +1,5 @@
 import injector
+from sqlalchemy.exc import IntegrityError
 
 from odoo_tasks_management.odoo.client import OdooClient
 from odoo_tasks_management.persistence.db import DB
@@ -23,7 +24,7 @@ class SynchronizeDatabase:
 
         # Get users from Database
         session = self._db.session()
-        existing_users = session.query(User).all()
+        existing_users = None  # session.query(User).all()
 
         if not existing_users:
             session.add_all(
@@ -32,7 +33,12 @@ class SynchronizeDatabase:
                     for u in users
                 ]
             )
-            session.commit()
+            try:
+                session.commit()
+            except IntegrityError as e:
+                session.rollback()
+                if "UniqueViolation" not in str(e):
+                    print(str(e))
             return
 
         # Compare the lists
@@ -44,7 +50,7 @@ class SynchronizeDatabase:
     def sync_projects(self):
         projects = self._odoo_client.get_all_projects()
         session = self._db.session()
-        existing_projects = session.query(Project).all()
+        existing_projects = None  # session.query(Project).all()
 
         if not existing_projects:
             session.add_all(
@@ -53,7 +59,12 @@ class SynchronizeDatabase:
                     for p in projects
                 ]
             )
-            session.commit()
+            try:
+                session.commit()
+            except IntegrityError as e:
+                session.rollback()
+                if "UniqueViolation" not in str(e):
+                    print(str(e))
             return
 
         # Compare the lists
@@ -65,28 +76,31 @@ class SynchronizeDatabase:
     def sync_tasks(self):
         tasks = self._odoo_client.get_all_tasks()
         session = self._db.session()
-        existing_tasks = session.query(Task).all()
+        existing_tasks = None  # session.query(Task).all()
 
         if not existing_tasks:
             for t in tasks:
-                session.add(Task(
-                    id=t['id'],
-                    project_id=t['project_id'][0],
-                    parent_task_id=t['parent_id'] if t['parent_id'] else None,
-                    assignee=t['user_id'][0] if t['user_id'] else None,
-                    responsible=t['partner_id'][0] if t['partner_id'] else None,
-                    title=t['name'],
-                    description=t['description'],
-                    deadline=t['date_deadline'] if t['date_deadline'] else None,
-                    status=t['stage_id'][1],
-                    planned_hours=t['planned_hours'],
-                ))
+                session.add(
+                    Task(
+                        id=t['id'],
+                        project_id=t['project_id'][0],
+                        parent_task_id=t['parent_id'] if t['parent_id'] else None,
+                        assignee=t['user_id'][0] if t['user_id'] else None,
+                        responsible=t['create_uid'][0] if t['create_uid'] else None,
+                        title=t['name'],
+                        description=t['description'],
+                        deadline=t['date_deadline'] if t['date_deadline'] else None,
+                        status=t['stage_id'][1],
+                        planned_hours=t['planned_hours'],
+                    )
+                )
                 try:
                     session.flush()
                     session.commit()
-                except:
-                    pass
-            return
+                except IntegrityError as e:
+                    session.rollback()
+                    if "UniqueViolation" not in str(e):
+                        print(str(e))
 
         # Compare the lists
         # TODO:
