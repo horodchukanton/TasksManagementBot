@@ -83,14 +83,14 @@ class SynchronizeDatabase:
                 session.add(
                     Task(
                         id=t['id'],
-                        project_id=t['project_id'][0],
-                        parent_task_id=t['parent_id'] if t['parent_id'] else None,
+                        project_id=t['project_id'][0] if t['project_id'] else None,
+                        parent_task_id=t['parent_id'][0] if t['parent_id'] else None,
                         assignee=t['user_id'][0] if t['user_id'] else None,
                         responsible=t['create_uid'][0] if t['create_uid'] else None,
                         title=t['name'],
                         description=t['description'],
                         deadline=t['date_deadline'] if t['date_deadline'] else None,
-                        status=t['stage_id'][1],
+                        status=t['stage_id'][1] if t['stage_id'] else None,
                         planned_hours=t['planned_hours'],
                     )
                 )
