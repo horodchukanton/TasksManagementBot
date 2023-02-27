@@ -1,3 +1,4 @@
+import re
 from typing import Union
 
 from sqlalchemy import and_
@@ -120,7 +121,7 @@ class ProjectsMenu(Procedure):
         task_responsible = task.responsible_user.login
         task_deadline = task.deadline
         task_status = task.status
-        task_description = task.description
+        task_description = self._clean_html_tags(task.description)
         task_planned_hours = task.planned_hours
 
         self._bot.send_message(
@@ -159,3 +160,7 @@ class ProjectsMenu(Procedure):
     #         self._bot,
     #         self._context['project']
     #     )
+    @staticmethod
+    def _clean_html_tags(description):
+        pattern = re.compile('<.*?>')
+        return re.sub(pattern, '', description)
