@@ -27,7 +27,7 @@ class Prompt:
         expects: List[str],
         text: str,
         buttons: Union[List[str], Callable] = None,
-        inline_buttons: Dict[str, Dict[str, Any]] = None,
+        inline_buttons: Union[Dict[str, Dict[str, Any]], List[str], Callable] = None,
     ):
         self._expects = expects
         self._handler = handler
