@@ -2,7 +2,7 @@ import logging
 from typing import Union
 
 import injector
-from telebot.types import Message
+from telebot.types import CallbackQuery, Message
 
 from odoo_tasks_management.business_logic.base.exc import OperationAborted
 from odoo_tasks_management.business_logic.base.operation import Operation
@@ -32,11 +32,15 @@ class Router:
     def handle_message(
         self,
         bot: Bot,
-        message: Message,
+        message: Union[Message, CallbackQuery],
     ):
         # Log the received message
         logging.debug("Received message:\n %s", str(message))
-        chat_id = message.chat.id
+        chat_id = (
+            message.chat.id
+            if isinstance(message, Message)
+            else message.message.chat.id
+        )
 
         if not self._check_user_authenticated(chat_id):
             authentication = self.get_authentication(bot)
