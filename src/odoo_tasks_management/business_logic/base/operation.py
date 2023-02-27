@@ -40,6 +40,11 @@ class Prompt:
         if self._inline_buttons:
             if isinstance(self._inline_buttons, Callable):
                 self._inline_buttons = self._inline_buttons()
+            if isinstance(self._inline_buttons, List):
+                self._inline_buttons = {
+                    name: {'callback_data': name} for name in self._inline_buttons
+                }
+
             self._inline_buttons = quick_markup(self._inline_buttons)
 
         if isinstance(self._buttons, Callable):
