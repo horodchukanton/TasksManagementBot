@@ -1,6 +1,8 @@
-from typing import Callable, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from telebot import types
+from telebot.types import CallbackQuery, Message
+from telebot.util import quick_markup
 
 from odoo_tasks_management.business_logic.base.exc import (
     OperationAborted,
@@ -9,20 +11,34 @@ from odoo_tasks_management.business_logic.base.exc import (
 from odoo_tasks_management.messenger.telegram import Bot
 
 
+class CallbackQueryAsMessage:
+    def __init__(self, callback_query: CallbackQuery):
+        self._callback_query = callback_query
+
+    @property
+    def text(self):
+        return self._callback_query.data
+
 class Prompt:
     def __init__(
         self,
         handler: Callable,
         expects: List[str],
         text: str,
+        inline_buttons: Dict[str, Dict[str, Any]] = None,
         buttons: List[str] = None
     ):
         self._expects = expects
         self._handler = handler
         self._text = text
         self._buttons = buttons
+        self._inline_buttons = inline_buttons
 
     def run(self, operation: "Operation", chat_id):
+
+        if self._inline_buttons:
+            self._inline_buttons = quick_markup(self._inline_buttons)
+
         if self._buttons:
             items = []
             markup = types.ReplyKeyboardMarkup()
@@ -37,11 +53,17 @@ class Prompt:
                 reply_markup=markup
             )
             return
-        operation.bot.send_message(chat_id, self._text)
 
-    def handle(self, chat_id, message):
-        self._check_message_is_expected(message)
-        self._handler(chat_id, message)
+        operation.bot.send_message(
+            chat_id, self._text, reply_markup=self._inline_buttons
+        )
+
+    def handle(self, chat_id, message: Union[Message, CallbackQuery]):
+        if isinstance(message, Message):
+            self._check_message_is_expected(message)
+            self._handler(chat_id, message)
+        else:
+            self._handler(chat_id, CallbackQueryAsMessage(message))
 
     def _check_message_is_expected(self, message):
         if message.content_type not in self._expects:
