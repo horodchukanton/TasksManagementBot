@@ -15,7 +15,7 @@ class Prompt:
         handler: Callable,
         expects: List[str],
         text: str,
-        buttons: List[str] = None
+        buttons: Union[List[str], Callable] = None
     ):
         self._expects = expects
         self._handler = handler
@@ -23,6 +23,10 @@ class Prompt:
         self._buttons = buttons
 
     def run(self, operation: "Operation", chat_id):
+
+        if isinstance(self._buttons, Callable):
+            self._buttons = self._buttons()
+
         if self._buttons:
             items = []
             markup = types.ReplyKeyboardMarkup()
@@ -87,7 +91,10 @@ class Operation:
             self._on_finish(chat_id)
 
     def _proceed(self, chat_id: Union[int, str], proceed_step: int):
-        if self._current_prompt_num > len(self._prompts) - 1:
+        if (
+            self._current_prompt_num > len(self._prompts) - 1
+            or self.is_finished
+        ):
             return self.finish(chat_id)
 
         self._current_prompt = self._prompts[proceed_step]

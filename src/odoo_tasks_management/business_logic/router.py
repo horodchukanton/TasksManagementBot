@@ -7,9 +7,9 @@ from telebot.types import Message
 from odoo_tasks_management.business_logic.base.exc import OperationAborted
 from odoo_tasks_management.business_logic.base.operation import Operation
 from odoo_tasks_management.business_logic.base.procedure import Procedure
-from odoo_tasks_management.business_logic.menu.projects_menu import ProjectsMenu
+from odoo_tasks_management.business_logic.menu.projects_tasks_menu import ProjectsMenu
+from odoo_tasks_management.business_logic.menu.create_task_menu import CreateTaskMenu
 from odoo_tasks_management.business_logic.menu.root_menu import RootMenu
-from odoo_tasks_management.business_logic.menu.tasks_project_menu import TasksForProjectMenu
 from odoo_tasks_management.business_logic.procedures.authentication import Authentication
 from odoo_tasks_management.messenger.telegram import Bot
 from odoo_tasks_management.odoo.client import OdooClient
@@ -106,3 +106,10 @@ class Router:
             chat_id,
             TasksForProjectMenu(db=self._db, router=self, bot=bot, project_name=project_name)
         )
+
+    def goto_create_task_menu(self, chat_id, bot):
+        self.proceed_with_procedure(
+            chat_id,
+            CreateTaskMenu(router=self, db=self._db, bot=bot)
+        )
+
