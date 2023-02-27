@@ -19,6 +19,7 @@ class CallbackQueryAsMessage:
     def text(self):
         return self._callback_query.data
 
+
 class Prompt:
     def __init__(
         self,
@@ -37,6 +38,8 @@ class Prompt:
     def run(self, operation: "Operation", chat_id):
 
         if self._inline_buttons:
+            if isinstance(self._inline_buttons, Callable):
+                self._inline_buttons = self._inline_buttons()
             self._inline_buttons = quick_markup(self._inline_buttons)
 
         if isinstance(self._buttons, Callable):
