@@ -76,8 +76,8 @@ class Prompt:
         self._message = message
 
     def run(self, operation: "Operation", chat_id):
-        message = self._build_message(operation, chat_id)
-        operation.bot.send_message(chat_id, **message)
+        if message := self._build_message(operation, chat_id):
+            operation.bot.send_message(chat_id, **message)
         return
 
     def _build_message(self, operation, chat_id: Union[str, int]):

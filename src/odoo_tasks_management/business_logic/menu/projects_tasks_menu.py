@@ -21,10 +21,7 @@ class ProjectsMenu(Procedure):
             bot=bot,
             prompts=[
                 Prompt(
-                    message=PromptMessage(
-                        buttons=self._get_projects(),
-                        text='За яким проектом бажаєте переглянути задачі'
-                    ),
+                    message=self.show_projects_list,
                     expects=["text"],
                     handler=self.project_chosen,
                 ),
@@ -48,6 +45,16 @@ class ProjectsMenu(Procedure):
         )
 
         self._context = {}
+
+    def show_projects_list(self, operation, chat_id):
+        bot = operation.bot
+
+        projects = self._get_projects()
+
+        for project_name in projects:
+            bot.send_message(chat_id, project_name)
+
+        return
 
     def _get_projects(self):
         # знаходимо id проекту
