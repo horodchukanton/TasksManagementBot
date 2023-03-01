@@ -2,9 +2,9 @@ import re
 from typing import Union
 
 from sqlalchemy import and_
-from telebot.types import Message, CallbackQuery
+from telebot.types import Message
 
-from odoo_tasks_management.business_logic.base.operation import Operation, Prompt
+from odoo_tasks_management.business_logic.base.operation import Operation, Prompt, PromptMessage
 from odoo_tasks_management.business_logic.base.procedure import Procedure
 from odoo_tasks_management.messenger.telegram import Bot
 from odoo_tasks_management.persistence.db import DB
@@ -21,35 +21,45 @@ class ProjectsMenu(Procedure):
             bot=bot,
             prompts=[
                 Prompt(
-                    inline_buttons=self._get_projects(),
+                    message=self.show_projects_list,
                     expects=["text"],
                     handler=self.project_chosen,
-                    text='За яким проектом бажаєте переглянути задачі'
                 ),
                 Prompt(
-                    buttons=self._get_tasks,
+                    message=PromptMessage(
+                        buttons=self._get_tasks,
+                        text="choose task"
+                    ),
                     expects=["text"],
                     handler=self.task_chosen,
                     text="Оберіть задачу"
                 ),
                 Prompt(
+                    message=PromptMessage(
+                        buttons=["Відмітити задачу, як виконану", "Головне меню"],
+                        text='Що ви хочете зробити із задачею?',
+                    ),
                     expects=["text"],
                     handler=self.chosen_process_with_tasks,
-                    text='Що ви хочете зробити із задачею?',
-                    buttons=[
-                        "Відмітити задачу, як виконану",
-                        "Головне меню", ]
                 ),
-            ],
-            on_finish=lambda x: True,
+            ]
         )
 
         self._context = {}
 
+    def show_projects_list(self, operation, chat_id):
+        bot = operation.bot
+
+        projects = self._get_projects()
+
+        for project_name in projects:
+            bot.send_message(chat_id, project_name)
+
+        return
+
     def _get_projects(self):
         # знаходимо id проекту
         projects_id = self._db.session().query(Project.id).all()
-
         current_projects_id = []
 
         # позбуваємось дивних знаків та отримуємо "чистий масив"
