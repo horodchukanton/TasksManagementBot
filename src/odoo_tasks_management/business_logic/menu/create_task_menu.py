@@ -2,7 +2,7 @@ from typing import Union
 
 from telebot.types import Message
 
-from odoo_tasks_management.business_logic.base.operation import Operation, Prompt
+from odoo_tasks_management.business_logic.base.operation import Operation, Prompt, PromptMessage
 from odoo_tasks_management.business_logic.base.procedure import Procedure
 from odoo_tasks_management.messenger.telegram import Bot
 from odoo_tasks_management.persistence.db import DB
@@ -18,20 +18,23 @@ class CreateTaskMenu(Procedure):
             bot=bot,
             prompts=[
                 Prompt(
-                    buttons=self._get_projects(),
+                    message=PromptMessage(
+                        buttons=self._get_projects(),
+                        text='Задачу для якого проекту бажаєте створити?'
+                    ),
                     expects=["text"],
                     handler=self.project_chosen,
-                    text='Задачу для якого проекту бажаєте створити?'
                 ),
                 Prompt(
-                    buttons=self._get_title(),
+                    message=PromptMessage(
+                        buttons=self._get_title(),
+                        text='Вкажіть заголовок для нової задачі?',
+                    ),
                     expects=["text"],
                     handler=self.task_title,
-                    text='Вкажіть заголовок для нової задачі?'
                 ),
 
-            ],
-            on_finish=lambda x: True,
+            ]
         )
 
         self._context = {}
@@ -53,4 +56,3 @@ class CreateTaskMenu(Procedure):
         project_name = message.text
         self._bot.send_message(chat_id, f"Chosen project is: {project_name}")
         self._context['project'] = project_name
-

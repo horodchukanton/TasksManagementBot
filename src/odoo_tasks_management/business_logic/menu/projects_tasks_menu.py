@@ -4,7 +4,7 @@ from typing import Union
 from sqlalchemy import and_
 from telebot.types import Message
 
-from odoo_tasks_management.business_logic.base.operation import Operation, Prompt
+from odoo_tasks_management.business_logic.base.operation import Operation, Prompt, PromptMessage
 from odoo_tasks_management.business_logic.base.procedure import Procedure
 from odoo_tasks_management.messenger.telegram import Bot
 from odoo_tasks_management.persistence.db import DB
@@ -21,27 +21,30 @@ class ProjectsMenu(Procedure):
             bot=bot,
             prompts=[
                 Prompt(
-                    buttons=self._get_projects(),
+                    message=PromptMessage(
+                        buttons=self._get_projects(),
+                        text='За яким проектом бажаєте переглянути задачі'
+                    ),
                     expects=["text"],
                     handler=self.project_chosen,
-                    text='За яким проектом бажаєте переглянути задачі'
                 ),
                 Prompt(
-                    buttons=self._get_tasks,
+                    message=PromptMessage(
+                        buttons=self._get_tasks,
+                        text="choose task"
+                    ),
                     expects=["text"],
                     handler=self.task_chosen,
-                    text="choose task"
                 ),
                 Prompt(
+                    message=PromptMessage(
+                        buttons=["Відмітити задачу, як виконану", "Головне меню"],
+                        text='Що ви хочете зробити із задачею?',
+                    ),
                     expects=["text"],
                     handler=self.chosen_process_with_tasks,
-                    text='Що ви хочете зробити із задачею?',
-                    buttons=[
-                        "Відмітити задачу, як виконану",
-                        "Головне меню", ]
                 ),
-            ],
-            on_finish=lambda x: True,
+            ]
         )
 
         self._context = {}
@@ -49,7 +52,6 @@ class ProjectsMenu(Procedure):
     def _get_projects(self):
         # знаходимо id проекту
         projects_id = self._db.session().query(Project.id).all()
-
         current_projects_id = []
 
         # позбуваємосб дивних знаків та отримуємо "чистий масив"

@@ -2,7 +2,7 @@ from typing import Union
 
 from telebot.types import Message
 
-from odoo_tasks_management.business_logic.base.operation import (Operation, Prompt)
+from odoo_tasks_management.business_logic.base.operation import (Operation, Prompt, PromptMessage)
 from odoo_tasks_management.business_logic.base.procedure import Procedure
 from odoo_tasks_management.messenger.telegram import Bot
 from odoo_tasks_management.persistence.db import DB
@@ -18,12 +18,12 @@ class RootMenu(Procedure):
             bot=bot,
             prompts=[
                 Prompt(
-                    buttons=[
-                        'Мої Задачі', 'Створити задачу'
-                    ],
+                    message=PromptMessage(
+                        text='Привіт! Вітаю у Головному меню',
+                        buttons=['Мої Задачі', 'Створити задачу']
+                    ),
                     expects=["text"],
                     handler=self.choose_chapter,
-                    text='Привіт! Вітаю у Головному меню'
                 ),
             ],
             on_finish=self._goto_chosen_chapter,

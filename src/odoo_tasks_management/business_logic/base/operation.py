@@ -20,54 +20,71 @@ class CallbackQueryAsMessage:
         return self._callback_query.data
 
 
+class PromptMessage:
+
+    def __init__(
+        self,
+        text: str,
+        buttons: Union[List[str], Callable] = None,
+        inline_buttons: Union[Dict[str, Dict[str, Any]], List[str], Callable] = None,
+    ):
+        self._text = text
+        self._buttons = buttons
+        self._inline_buttons = inline_buttons
+
+    def build(self):
+        message = {'text': self._text}
+
+        if self._inline_buttons:
+            message = {**message, 'reply_markup': self._build_inline_buttons()}
+        elif self._buttons:
+            message = {**message, 'reply_markup': self._build_buttons()}
+
+        return message
+
+    def _build_inline_buttons(self):
+        if isinstance(self._inline_buttons, Callable):
+            _inline_buttons = self._inline_buttons()
+        elif isinstance(self._inline_buttons, List):
+            _inline_buttons = {
+                name: {'callback_data': name} for name in self._inline_buttons
+            }
+        else:
+            # Assuming we got a dictionary with button names and callback data
+            _inline_buttons = self._inline_buttons
+        return quick_markup(_inline_buttons)
+
+    def _build_buttons(self):
+        items = []
+        markup = types.ReplyKeyboardMarkup()
+        for button in self._buttons:
+            item = types.KeyboardButton(f'{button}')
+            items.append(item)
+        markup.row(*items)
+        return markup
+
+
 class Prompt:
     def __init__(
         self,
         handler: Callable,
         expects: List[str],
-        text: str,
-        buttons: Union[List[str], Callable] = None,
-        inline_buttons: Union[Dict[str, Dict[str, Any]], List[str], Callable] = None,
+        message: Union[PromptMessage, Callable]
     ):
         self._expects = expects
         self._handler = handler
-        self._text = text
-        self._buttons = buttons
-        self._inline_buttons = inline_buttons
+        self._message = message
 
     def run(self, operation: "Operation", chat_id):
+        message = self._build_message(operation, chat_id)
+        operation.bot.send_message(chat_id, **message)
+        return
 
-        if self._inline_buttons:
-            if isinstance(self._inline_buttons, Callable):
-                self._inline_buttons = self._inline_buttons()
-            if isinstance(self._inline_buttons, List):
-                self._inline_buttons = {
-                    name: {'callback_data': name} for name in self._inline_buttons
-                }
-
-            self._inline_buttons = quick_markup(self._inline_buttons)
-
-        if isinstance(self._buttons, Callable):
-            self._buttons = self._buttons()
-
-        if self._buttons:
-            items = []
-            markup = types.ReplyKeyboardMarkup()
-            for button in self._buttons:
-                item = types.KeyboardButton(f'{button}')
-                items.append(item)
-            markup.row(*items)
-
-            operation.bot.send_message(
-                chat_id,
-                self._text,
-                reply_markup=markup
-            )
-            return
-
-        operation.bot.send_message(
-            chat_id, self._text, reply_markup=self._inline_buttons
-        )
+    def _build_message(self, operation, chat_id: Union[str, int]):
+        if isinstance(self._message, Callable):
+            return self._message(operation, chat_id)
+        else:
+            return self._message.build()
 
     def handle(self, chat_id, message: Union[Message, CallbackQuery]):
         if isinstance(message, Message):
