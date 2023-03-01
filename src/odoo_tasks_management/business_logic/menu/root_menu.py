@@ -38,8 +38,8 @@ class RootMenu(Procedure):
         if self._context['chosen'] == "Мої Задачі":
             self._router.goto_projects_menu(chat_id, self._bot)
         elif self._context['chosen'] == "Створити задачу":
-            self._router.goto_create_task_menu(chat_id, self._bot)
-            # self._bot.send_message(
-            #     chat_id,
-            #     "Ще не готово, зачекайте трошечки"
-            # )
+            # self._router.goto_create_task_menu(chat_id, self._bot)
+            self._bot.send_message(
+                chat_id,
+                "Ще не готово, зачекайте трошечки"
+            )

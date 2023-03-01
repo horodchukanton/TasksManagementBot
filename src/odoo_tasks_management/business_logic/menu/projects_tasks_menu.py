@@ -2,7 +2,7 @@ import re
 from typing import Union
 
 from sqlalchemy import and_
-from telebot.types import Message
+from telebot.types import Message, CallbackQuery
 
 from odoo_tasks_management.business_logic.base.operation import Operation, Prompt
 from odoo_tasks_management.business_logic.base.procedure import Procedure
@@ -21,7 +21,7 @@ class ProjectsMenu(Procedure):
             bot=bot,
             prompts=[
                 Prompt(
-                    buttons=self._get_projects(),
+                    inline_buttons=self._get_projects(),
                     expects=["text"],
                     handler=self.project_chosen,
                     text='За яким проектом бажаєте переглянути задачі'
@@ -30,7 +30,7 @@ class ProjectsMenu(Procedure):
                     buttons=self._get_tasks,
                     expects=["text"],
                     handler=self.task_chosen,
-                    text="choose task"
+                    text="Оберіть задачу"
                 ),
                 Prompt(
                     expects=["text"],
@@ -52,7 +52,7 @@ class ProjectsMenu(Procedure):
 
         current_projects_id = []
 
-        # позбуваємосб дивних знаків та отримуємо "чистий масив"
+        # позбуваємось дивних знаків та отримуємо "чистий масив"
         for id in projects_id:
             current_projects_id.append(id[0])
 
@@ -71,29 +71,36 @@ class ProjectsMenu(Procedure):
             task_projects_ids.append(id[0])
 
         # знаходимо по id в таблиці проектів назву відповідного проекту, добавляємо в масив
-        project_names = self._db.session().query(Project.name).filter(
+        project_names = self._db.session().query(Project.name, Project.id).filter(
             Project.id.in_(task_projects_ids)
         ).all()
 
-        # позбуваємосб дивних знаків та отримуємо "чистий масив"
+        # позбуваємос дивних знаків та отримуємо "чистий масив"
         project_names_ = []
         for id in project_names:
             project_names_.append(id[0])
 
-        return project_names_
+        inline_buttons = {}
 
-    def project_chosen(self, chat_id, message: Message):
-        project_name = message.text
+        for value in project_names:
+            button_name = f"{value[0]}"
+            callback_data = value[1]
+            inline_buttons[button_name] = {'callback_data': callback_data}
+        print(inline_buttons)
+        return inline_buttons
 
-        current_project_id = self._db.session().query(Project.id).filter(
-            Project.name == project_name).one()[0]
-        self._context['project_id'] = current_project_id
+    def project_chosen(self, chat_id, message):
+        project_id = message.text
+        self._context['project_id'] = project_id
+
+        current_project_name = self._db.session().query(Project.name).filter(
+            Project.id == project_id).one()[0]
 
         project_tasks = self._db.session().query(Task.title).where(
-            (Task.project_id == current_project_id) & (
+            (Task.project_id == project_id) & (
                     Task.status != "Виконано")).all()
-        self._bot.send_message(chat_id, f"Обраний проект: {project_name}")
-        self._context['project'] = project_name
+        self._bot.send_message(chat_id, f"Обраний проект: {current_project_name}")
+        self._context['project'] = current_project_name
 
         current_project_tasks = []
         if not project_tasks:
@@ -111,12 +118,19 @@ class ProjectsMenu(Procedure):
 
     def task_chosen(self, chat_id, message):
         task_title = message.text
+        if task_title not in self._context['tasks']:
+            self._bot.send_message(
+                chat_id, "Введено неочікуваний текст"
+            )
+            self._router.goto_root_menu(chat_id, self._bot)
+
         current_project_id = self._context['project_id']
         task = self._db.session().query(Task).filter(
             and_(
                 Task.title == task_title,
                 Task.project_id == current_project_id
             )).one()
+
         task_assignee = task.assignee_user.login
         task_responsible = task.responsible_user.login
         task_deadline = task.deadline
@@ -141,12 +155,16 @@ class ProjectsMenu(Procedure):
         if message.text == "Відмітити задачу, як виконану":
             task_title = self._context['task']
             session = self._db.session()
-            task = session.query(Task).filter_by(title=task_title).one()
-            task.status = 'Done'
+            task = session.query(Task).filter(
+                and_(
+                    Task.title == task_title,
+                    Task.project_id == self._context['project_id']
+                )).one()
+            task.status = 'Виконано'
             session.flush()
             session.commit()
             self._bot.send_message(chat_id,
-                                   f"<b>{task_title}</b> status is <b>Done</b>",
+                                   f"<b>{task_title}</b> статус <b>Виконано</b>",
                                    parse_mode='HTML')
 
             self._router.goto_root_menu(chat_id, self._bot)

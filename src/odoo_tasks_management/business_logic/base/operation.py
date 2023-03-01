@@ -68,7 +68,6 @@ class Prompt:
         operation.bot.send_message(
             chat_id, self._text, reply_markup=self._inline_buttons
         )
-
     def handle(self, chat_id, message: Union[Message, CallbackQuery]):
         if isinstance(message, Message):
             self._check_message_is_expected(message)
