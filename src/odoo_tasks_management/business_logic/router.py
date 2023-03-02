@@ -14,6 +14,7 @@ from odoo_tasks_management.business_logic.procedures.authentication import Authe
 from odoo_tasks_management.messenger.telegram import Bot
 from odoo_tasks_management.odoo.client import OdooClient
 from odoo_tasks_management.persistence.db import DB
+from odoo_tasks_management.persistence.models import User
 
 
 class Router:
@@ -42,13 +43,12 @@ class Router:
             else message.message.chat.id
         )
 
-        if not self._check_user_authenticated(chat_id):
-            authentication = self.get_authentication(bot)
-            self._start_procedure(chat_id, authentication)
-
         # Handle a conversation
         if self._handle_existing_operation(bot, chat_id, message):
             return
+
+        if not self._check_user_authenticated(chat_id):
+            return self.goto_authentication(chat_id, bot)
 
         menu_logic = RootMenu(self, bot, self._db)
         self._start_procedure(chat_id, menu_logic)
@@ -75,7 +75,8 @@ class Router:
 
     def _finish_operation(self, chat_id):
         # Remove the running operation for the user
-        del self._running_operations[chat_id]
+        if hasattr(self._running_operations, 'chat_id'):
+            del self._running_operations[chat_id]
 
     def _start_procedure(self, chat_id, procedure: Procedure):
         self._running_operations[chat_id] = procedure.run(chat_id)
@@ -85,12 +86,20 @@ class Router:
         self._start_procedure(chat_id, procedure)
 
     def _check_user_authenticated(self, chat_id):
-        return True
+        user = self._db.session().query(User.id).filter(
+            User.telegram_chat_id == chat_id
+        ).one_or_none()
+        return user is not None
 
     def goto_authentication(self, chat_id, bot: Bot):
         self.proceed_with_procedure(
             chat_id,
-            Authentication(bot=bot, db=self._db, odoo_client=self._odoo_client)
+            Authentication(
+                router=self,
+                bot=bot,
+                db=self._db,
+                odoo_client=self._odoo_client
+            )
         )
 
     def goto_root_menu(self, chat_id, bot: Bot):
@@ -116,4 +125,3 @@ class Router:
             chat_id,
             CreateTaskMenu(router=self, db=self._db, bot=bot)
         )
-

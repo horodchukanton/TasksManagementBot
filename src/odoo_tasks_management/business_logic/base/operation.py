@@ -69,7 +69,7 @@ class Prompt:
         self,
         handler: Callable,
         expects: List[str],
-        message: Union[PromptMessage, Callable]
+        message: Union[PromptMessage, Callable, str]
     ):
         self._expects = expects
         self._handler = handler
@@ -81,10 +81,11 @@ class Prompt:
         return
 
     def _build_message(self, operation, chat_id: Union[str, int]):
+        if isinstance(self._message, str):
+            return {'text': self._message}
         if isinstance(self._message, Callable):
             return self._message(operation, chat_id)
-        else:
-            return self._message.build()
+        return self._message.build()
 
     def handle(self, chat_id, message: Union[Message, CallbackQuery]):
         if isinstance(message, Message):

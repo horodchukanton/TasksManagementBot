@@ -67,9 +67,16 @@ class OdooClient:
             self.api_key,
             "res.users",
             "search_read",
-            [],
-            {"fields": ["id", "name", "login", "email"]}
+            [[('active', '=', True)]],
+            {
+                "fields": [
+                    "id",
+                    "login",
+                    "partner_id"
+                ]
+            }
         )
+
         return users
 
     def create_task(self, project_name, partner_name, task_name, description, deadline):
@@ -83,7 +90,7 @@ class OdooClient:
             "search",
             [["name", "=", project_name]],
         )
-        proj_id = proj_id[0]  #  list to int
+        proj_id = proj_id[0]  # list to int
 
         # отримати id клієнта по його імені
         part_id = self.models.execute_kw(
@@ -95,7 +102,7 @@ class OdooClient:
             [[["name", "=", partner_name]]],
             {},
         )
-        part_id = part_id[0]  #  list to int
+        part_id = part_id[0]  # list to int
 
         # необхідні поля для нової таски
         fields = {
@@ -162,5 +169,63 @@ class OdooClient:
         return all_tasks
 
     def send_inbox_message(self, login, message):
-        # TODO
-        pass
+        channel_id = self.get_channel_id()
+        partner_id = self.find_partner_id_for_user(login)
+
+        notification_ids = [
+            (0, 0, {'res_partner_id': partner_id, 'notification_type': 'inbox'})
+        ]
+
+        fields = {
+            # 'id': channel_id,
+            'author_id': 3,
+            'body': message,
+            'message_type': 'notification',
+            'subtype_xmlid': "mail.mt_comment",
+            'notification_ids': notification_ids,
+            'partner_ids': [partner_id],
+            'notify_by_email': False,
+        }
+
+        return self.models.execute_kw(
+            self.database, self.uid, self.api_key, "mail.channel", "message_post",
+            [channel_id],
+            fields
+        )
+
+    def find_partner_id_for_user(self, login):
+        partner_id = self.models.execute(
+            self.database,
+            self.uid,
+            self.api_key,
+            "res.partner",
+            "search",
+            [["email", "=", login]],
+        )
+        if partner_id:
+            return partner_id[0]
+
+        return None
+
+    def get_channel_id(self):
+        # Search for channel
+        channel_name = "WEBA Telegram bot notifications"
+        channel_id = self.models.execute(
+            self.database,
+            self.uid,
+            self.api_key,
+            "mail.channel",
+            "search",
+            [["name", "=", channel_name]],
+        )
+        if channel_id:
+            return channel_id[0]
+
+        # Create new channel
+        return self.models.execute_kw(
+            self.database, self.uid, self.api_key, "mail.channel", "create", [{
+                "name": channel_name,
+                "description": "Telegram bot internal notifications",
+                "public": "groups",
+            }]
+        )
