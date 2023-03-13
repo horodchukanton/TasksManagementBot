@@ -55,7 +55,11 @@ class SynchronizeDatabase:
         if not existing_projects:
             session.add_all(
                 [
-                    Project(id=p["id"], name=p["name"])
+                    Project(
+                        id=p["id"],
+                        name=p["name"],
+                        user_id=p["user_id"][0] if p["user_id"] else None
+                            )
                     for p in projects
                 ]
             )

@@ -9,6 +9,7 @@ class Project(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
+    user_id = Column(Integer)
 
 
 class User(Base):

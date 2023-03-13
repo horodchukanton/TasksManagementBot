@@ -127,6 +127,7 @@ class OdooClient:
                     "user_id",  # Керівник
                     "create_date",
                     "description",
+
                 ]
             },
         )
