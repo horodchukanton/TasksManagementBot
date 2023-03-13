@@ -16,8 +16,11 @@ class User(Base):
     __tablename__ = "weba_telegram_bot_users"
 
     id = Column(Integer, primary_key=True)
+    partner_id = Column(Integer)
     login = Column(String)
-    telegram_chat_id = Column(String)
+    email = Column(String)
+    name = Column(String)
+    telegram_chat_id = Column(Integer)
     access_level = Column(Integer)
 
 

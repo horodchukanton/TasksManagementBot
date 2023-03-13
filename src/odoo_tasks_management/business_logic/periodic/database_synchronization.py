@@ -29,7 +29,13 @@ class SynchronizeDatabase:
         if not existing_users:
             session.add_all(
                 [
-                    User(id=u["id"], login=u["login"])
+                    User(
+                        id=u["id"],
+                        partner_id=u["partner_id"][0],
+                        name=u["partner_id"][1],
+                        login=u["login"],
+                        email=u["login"],
+                    )
                     for u in users
                 ]
             )
