@@ -57,7 +57,7 @@ class ProjectsMenu(Procedure):
             )
             bot.send_message(chat_id, text='⇲️', reply_markup=markup)
         main_menu = types.ReplyKeyboardMarkup()
-        row1 = 'Головне меню'
+        row1 = 'Головне Меню'
         main_menu.row(row1)
         bot.send_message(
             chat_id,
@@ -109,7 +109,7 @@ class ProjectsMenu(Procedure):
         return inline_buttons
 
     def project_chosen(self, chat_id, message):
-        if message.text == "Головне меню":
+        if message.text == "Головне Меню":
             self._router.goto_root_menu(chat_id, self._bot)
             self._operation.is_finished = True
             return
@@ -136,6 +136,17 @@ class ProjectsMenu(Procedure):
                 {task_name: {'callback_data': task_id}},
             )
             bot.send_message(chat_id, text='⇲️', reply_markup=markup)
+
+        main_menu = types.ReplyKeyboardMarkup()
+        row2 = 'Головне Меню'
+        main_menu.row(row2)
+        bot.send_message(
+            chat_id,
+            text='Щоб повернутись в Головне меню, натисніть на клавіатуру',
+            reply_markup=main_menu
+        )
+        return
+
 
     def _get_tasks(self, chat_id):
         project_id = self._context['project_id']
@@ -171,6 +182,11 @@ class ProjectsMenu(Procedure):
         return inline_tasks_buttons
 
     def task_chosen(self, chat_id, message):
+        if message.text == "Головне Меню":
+            self._router.goto_root_menu(chat_id, self._bot)
+            self._operation.is_finished = True
+            return
+
         task_id = message.text
         task_title = self._db.session().query(Task.title).filter(
                 Task.id == task_id).one()[0]

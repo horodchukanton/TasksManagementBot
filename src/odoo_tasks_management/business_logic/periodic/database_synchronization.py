@@ -64,7 +64,8 @@ class SynchronizeDatabase:
                     Project(
                         id=p["id"],
                         name=p["name"],
-                        user_id=p["user_id"][0] if p["user_id"] else None
+                        user_id=p["user_id"][0] if p["user_id"] else None,
+                        partner_id=p["partner_id"][0] if p["partner_id"] else None,
                             )
                     for p in projects
                 ]

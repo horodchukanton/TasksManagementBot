@@ -79,39 +79,33 @@ class OdooClient:
 
         return users
 
-    def create_task(self, project_name, partner_name, task_name, description, deadline):
-        # отримати id проекту по його назві
-        proj_id = self.models.execute(
-            self,
-            self.database,
-            self.uid,
-            self.api_key,
-            "project.project",
-            "search",
-            [["name", "=", project_name]],
-        )
-        proj_id = proj_id[0]  # list to int
+    def create_task(self, project_id, task_name, description, deadline, responsible_id, assignee_id, planned_hours, partner_id):
 
-        # отримати id клієнта по його імені
-        part_id = self.models.execute_kw(
-            self.database,
-            self.uid,
-            self.api_key,
-            "res.partner",
-            "search",
-            [[["name", "=", partner_name]]],
-            {},
-        )
-        part_id = part_id[0]  # list to int
+
+        # # отримати id клієнта по його імені
+        # part_id = self.models.execute_kw(
+        #     self.database,
+        #     self.uid,
+        #     self.api_key,
+        #     "res.partner",
+        #     "search",
+        #     [[["name", "=", partner_name]]],
+        #     {},
+        # )
+        # part_id = part_id[0]  # list to int
 
         # необхідні поля для нової таски
         fields = {
             "name": task_name,  # char, назва задачі
-            "project_id": proj_id,  # int, зв'язок з 'project.project'
+            "project_id": int(project_id),  # int, зв'язок з 'project.project'
             "description": description,  # html
             "stage_id": 0,  # int4, Тут Є питання !. Зв'язок з 'project.task.type'. Індексація з 0.
-            "partner_id": part_id,  # int, Клієнт, зв'язок з 'res.partner'
             "date_deadline": deadline,  # YYYY-MM-DD
+            "create_uid": responsible_id,
+            "user_id": int(assignee_id),
+            "planned_hours": planned_hours,
+            "kanban_state": 'normal',
+            "partner_id": partner_id,  # int, Клієнт, зв'язок з 'res.partner'
         }
 
         new_task = self.models.execute_kw(

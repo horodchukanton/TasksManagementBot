@@ -10,7 +10,7 @@ class Project(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     user_id = Column(Integer)
-
+    partner_id = Column(Integer)
 
 class User(Base):
     __tablename__ = "weba_telegram_bot_users"
@@ -42,6 +42,7 @@ class Task(Base):
     parent_task = relationship("Task", remote_side=[id])
     assignee_user = relationship("User", foreign_keys=[assignee])
     responsible_user = relationship("User", foreign_keys=[responsible])
+
 
 
 #

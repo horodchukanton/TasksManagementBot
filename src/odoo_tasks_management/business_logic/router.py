@@ -123,5 +123,5 @@ class Router:
     def goto_create_task_menu(self, chat_id, bot):
         self.proceed_with_procedure(
             chat_id,
-            CreateTaskMenu(router=self, db=self._db, bot=bot)
+            CreateTaskMenu(router=self, db=self._db, bot=bot, odoo_client=self._odoo_client)
         )
