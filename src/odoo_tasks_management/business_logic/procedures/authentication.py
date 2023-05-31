@@ -70,6 +70,7 @@ class Authentication(Procedure):
         ).one()
         find_user.telegram_chat_id = chat_id
         session.flush()
+        session.commit()
 
         self._bot.send_message(
             chat_id, f"Вітаємо в чаті, {find_user.name}"

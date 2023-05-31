@@ -55,6 +55,9 @@ class PromptMessage:
         return quick_markup(_inline_buttons)
 
     def _build_buttons(self):
+        if isinstance(self._buttons, Callable):
+            self._buttons = self._buttons()
+
         items = []
         markup = types.ReplyKeyboardMarkup()
         for button in self._buttons:
